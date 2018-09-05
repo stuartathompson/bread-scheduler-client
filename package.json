@@ -1,8 +1,8 @@
 {
-  "name": "client",
+  "name": "CityScheduler",
   "version": "1.0.0",
-  "description": "A Vue.js project",
-  "author": "Aneeta Sharma <get.aneeta@gmail.com>",
+  "description": "Managing city bylaw cases",
+  "author": "Stuart Thompson (via template from Aneeta Sharma get.aneeta@gmail.com)",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
