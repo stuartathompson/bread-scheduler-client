@@ -1,0 +1,11 @@
+@media print {
+    .sidebar{
+      display:none;
+    }
+    .btn{
+      display:none;
+    }
+    .noprint{
+      visibility: hidden;
+    }
+}

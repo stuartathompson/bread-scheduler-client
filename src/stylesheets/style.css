@@ -1,0 +1,74 @@
+body,.btn,input,.form-control{
+  font-size:.85rem;
+}
+thead th{
+  border-top:0 !important;
+}
+.sidebar,.logo{
+  border-right: 1px solid rgba(0,0,0,.0625);
+}
+.records{
+  width:100%
+}
+.nav, .nav a{
+  color:#333;
+  font-size:.9rem;
+  min-width:200px;
+  margin:0;
+}
+.nav .btn{
+  width:100%;
+  text-align: left;
+}
+.sidebar.nav ul{
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+.sidebar.nav ul{
+}
+.sidebar.nav ul li{
+  width:100%;
+  padding:0;
+  margin:0;
+}
+.sidebar.nav ul li a{
+  padding:.8rem 1rem;
+}
+.sidebar.nav ul li a:hover{
+  background-color: rgba(0, 0, 0, 0.03);
+}
+.sidebar.nav ul li.nav-item{
+}
+.card-body table.table{
+  margin-bottom:0;
+}
+.table th{
+  font-weight:100;
+}
+.table td{
+  min-width:150px;
+}
+.table.no-top-line tr:first-child td, .table.no-top-line tr:first-child th{
+  border-top:0;
+  padding-top:0;
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+.card-body h5{
+  font-size: .9rem;
+  padding: .6rem;
+  font-weight: 500;
+}
+.vdp-datepicker__calendar .cell.selected {
+    background: #437BEE;
+    color:white;
+}
+.vdp-datepicker__calendar .cell.selected:hover {
+    background: #437BEE;
+    color:white;
+}
+.form-control[readonly] {
+  background-color: white;
+}
