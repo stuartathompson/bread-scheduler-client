@@ -1,8 +1,3 @@
-<style>
-  @import 'stylesheets/style.css';
-  @import 'stylesheets/print.css';
-</style>
-
 <template>
   <div id="app" class="">
     <nav class="navbar navbar-expand navbar-dark bg-primary">

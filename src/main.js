@@ -10,6 +10,8 @@ Vue.use(BootstrapVue)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+require('../static/style.css')
+
 Vue.use(VueSweetalert2)
 Vue.config.productionTip = false
 
