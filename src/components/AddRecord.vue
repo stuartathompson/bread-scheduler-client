@@ -98,12 +98,7 @@ export default {
         notes: this.notes,
         date: new Date(this.date)
       })
-      this.$swal(
-        'Great!',
-        `Your post has been added!`,
-        'success'
-      )
-      this.$router.push({ name: 'Records' })
+      this.$router.push({ name: 'Records', params: { message: 'Your record was added.' } })
     }
   }
 }

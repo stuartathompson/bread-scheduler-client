@@ -35,6 +35,7 @@
 
 <script>
 import RecordsService from '@/services/RecordsService'
+import AuthService from '@/services/AuthService'
 import moment from 'moment'
 export default {
   name: 'records',
@@ -64,11 +65,18 @@ export default {
       currentPage: 1,
       filter: null,
       totalRows: 0,
-      allRecords: null
+      allRecords: null,
+      message: 'test'
     }
   },
-  mounted () {
+  created () {
+    this.auth()
+  },
+  beforeMount () {
     this.getRecords()
+  },
+  mounted () {
+    this.getMessage()
   },
   filters: {
     date: function (value) {
@@ -77,11 +85,35 @@ export default {
     }
   },
   methods: {
+    getMessage () {
+      this.message = this.$route.params ? this.$route.params.message : ''
+    },
+    async auth () {
+      if (!localStorage.getItem('token')) {
+        this.$router.push('login')
+      } else {
+        const response = await AuthService.auth({ token: localStorage.getItem('token') })
+        if (response.data.success) {
+          this.auth = true
+        } else {
+          this.$router.push('login')
+        }
+      }
+    },
     async getRecords () {
-      const response = await RecordsService.fetchRecords()
-      this.records = response.data.records
-      this.allRecords = this.records
-      this.totalRows = this.records.length
+      const response = await RecordsService.records()
+      if (response.data.success) {
+        this.records = response.data.records
+        this.allRecords = this.records
+        this.totalRows = this.records.length
+      } else if (response.data.redirect) {
+        // window.location = response.data.redirect
+        this.$router.push(response.data.redirect)
+      } else {
+        // Default redirect : Only logged in users should be here
+        // window.location = '/login'
+        this.$router.push('login')
+      }
     },
     async searchRecord () {
       if (this.filter === '') {

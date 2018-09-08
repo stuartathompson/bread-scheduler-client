@@ -1,8 +1,22 @@
 import axios from 'axios'
 
+const baseURL = process.env.NODE_ENV === 'production' ? 'http://sheltered-earth-60660.herokuapp.com/' : 'http://localhost:8081'
+
+function validToken () {
+  return localStorage.getItem('token')
+}
+
+// const config = {
+//   headers: {
+//     'Authorization': 'Bearer ' + validToken()
+//   }
+// }
+
 export default() => {
   return axios.create({
-    baseURL: 'http://sheltered-earth-60660.herokuapp.com/'
-    // baseURL: `http://localhost:8081`
+    baseURL: baseURL,
+    headers: {
+      'Authorization': 'Bearer ' + validToken()
+    }
   })
 }

@@ -1,7 +1,7 @@
 import Api from '@/services/Api'
 
 export default {
-  fetchRecords () {
+  records () {
     return Api().get('records')
   },
 
