@@ -210,6 +210,7 @@ export default {
   name: 'editrecord',
   data () {
     return {
+      _id: '',
       record_id: '',
       description: '',
       notes: '',
