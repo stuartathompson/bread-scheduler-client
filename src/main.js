@@ -15,6 +15,8 @@ require('../static/style.css')
 Vue.use(VueSweetalert2)
 Vue.config.productionTip = false
 
+console.log('updated..')
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
