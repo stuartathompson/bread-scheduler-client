@@ -39,7 +39,7 @@
           <!-- <b-btn variant="primary">Start this recipe</b-btn> -->
         </b-col>
         <b-col offset="1">
-          <h6>Bread Scheduler</h6>
+          <h6>Bread Sked</h6>
           <b-card>
             <p>
               If you started right now, you would finish between {{ finishTimeMin }} and {{ finishTimeMax }}. Adjust your schedule by choosing a time that works for you.

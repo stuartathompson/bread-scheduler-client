@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="">
     <b-nav class="p-3 text-dark text-large">
-      <router-link to="/" class="text-primary logo"><timer-icon></timer-icon>Bread Scheduler</router-link>
+      <router-link to="/" class="text-primary logo"><timer-icon></timer-icon>Bread Sked</router-link>
       <b-col class="float-right">
         <router-link to="/" class="text-dark"><plus-icon></plus-icon>Add your recipe</router-link>
         <router-link to="/" class="text-dark">About</router-link>

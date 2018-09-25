@@ -1,7 +1,7 @@
 {
-  "name": "CityScheduler",
+  "name": "BreadScheduler",
   "version": "1.0.0",
-  "description": "Managing city bylaw cases",
+  "description": "Bread recipe scheduler and timer for easier sourdough baking.",
   "author": "Stuart Thompson (via template from Aneeta Sharma get.aneeta@gmail.com)",
   "private": true,
   "scripts": {
