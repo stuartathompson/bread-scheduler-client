@@ -15,6 +15,7 @@ import PlusIcon from 'vue-material-design-icons/Plus.vue'
 import StarIcon from 'vue-material-design-icons/Star.vue'
 import HomeIcon from 'vue-material-design-icons/Home.vue'
 import TimerIcon from 'vue-material-design-icons/Timer.vue'
+import MinimizeIcon from 'vue-material-design-icons/WindowMinimize.vue'
 import LoadingIcon from 'vue-material-design-icons/Loading.vue'
 import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeftBold.vue'
 import CloseIcon from 'vue-material-design-icons/Close.vue'
@@ -34,6 +35,7 @@ Vue.component('edit-icon', EditIcon)
 Vue.component('plus-icon', PlusIcon)
 Vue.component('star-icon', StarIcon)
 Vue.component('home-icon', HomeIcon)
+Vue.component('minimize-icon', MinimizeIcon)
 Vue.component('arrow-left-icon', ArrowLeftIcon)
 Vue.component('loading-icon', LoadingIcon)
 Vue.component('close-icon', CloseIcon)

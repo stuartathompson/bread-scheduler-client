@@ -2,12 +2,11 @@
   <div id="app" class="">
     <b-nav class="p-3 text-dark text-large">
       <router-link to="/" class="text-primary logo"><timer-icon></timer-icon>Bread Sked</router-link>
-      <b-col class="float-right">
+      <!-- <b-col class="float-right">
         <router-link to="/" class="text-dark"><plus-icon></plus-icon>Add your recipe</router-link>
         <router-link to="/" class="text-dark">About</router-link>
         <router-link to="/" class="text-dark">Contact</router-link>
-
-      </b-col>
+      </b-col> -->
     </b-nav>
     <router-view></router-view>
     <div class="container">
@@ -15,6 +14,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 // import UsersService from '@/services/UsersService'
@@ -59,19 +59,9 @@ export default {
   updated () {
   },
   computed: {
-    authStatus: function () {
-      return this.$store.state.authStatus
-    },
-    count: function () {
-      return this.$store.state.count
-    }
   },
   mounted () {
-    // let that = this
-    // this.$root.$on('authStatus', (status) => {
-    //   if (status) that.auth = true
-    // })
-    this.$store.dispatch('auth')
+    // this.$store.dispatch('auth')
   },
   methods: {
     openRecipe: function (recipe) {

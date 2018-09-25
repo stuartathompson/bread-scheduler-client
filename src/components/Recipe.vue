@@ -1,5 +1,17 @@
 <template>
   <div class="recipe mt-5">
+    <div class="timer shadow-sm bg-light text-center border border-bottom-0">
+      <nav class="bg-light p-1 text-right">
+        <minimize-icon></minimize-icon>
+        <close-icon></close-icon>
+      </nav>
+      <div class="border border-left-0 border-right-0 bg-white p-3 big-num text-primary">
+        <timer-icon></timer-icon> {{ timer.timeLeft }}
+      </div>
+      <p class="p-2 pb-4">
+        Time left on until you can start the <b-link>mix</b-link>.
+      </p>
+    </div>
     <b-container>
       <b-row>
         <b-col>
@@ -22,15 +34,15 @@
       </b-row>
       <b-row class="mt-5">
         <b-col md="3">
-          <h4>Start now and finish {{ finishTimeMin }}</h4>
-          <p>
+          <h3>Start now and finish {{ finishTimeMin }}</h3>
+          <p class="pb-4">
             {{ recipe.description }}
           </p>
-          <p>
+          <div class="pb-1">
             <strong>What you'll need</strong>
-          </p>
-
-          <b-table  thead-class="d-none" small v-if="recipe.ingredients.length > 0" :items="recipe.ingredients" :fields="ingredientTableFields">
+          </div>
+          <b-table thead-class="d-none" v-if="recipe && recipe.ingredients && recipe.ingredients.length > 0" :items="recipe.ingredients" :fields="ingredientTableFields"
+          class="table-no-top-rule">
             <template slot="amount" slot-scope="data">
               {{ convertMeasurement(data.item) }}
             </template>
@@ -39,7 +51,8 @@
           <!-- <b-btn variant="primary">Start this recipe</b-btn> -->
         </b-col>
         <b-col offset="1">
-          <h6>Bread Sked</h6>
+
+          <h4>Bread Sked</h4>
           <b-card>
             <p>
               If you started right now, you would finish between {{ finishTimeMin }} and {{ finishTimeMax }}. Adjust your schedule by choosing a time that works for you.
@@ -47,30 +60,35 @@
             <!-- <b-btn small>6 p.m.</b-btn> <b-btn>9 a.m.</b-btn> <b-btn>Noon</b-btn> -->
             <div v-if="recipe" id="scheduler" class="viz">&nbsp;</div>
           </b-card>
-          <h6 class="mt-4">Steps</h6>
-          <b-card>
-            <div v-for="step of recipe.steps">
+
+          <h4 class="mt-4">Steps</h4>
+          <b-card no-body>
+            <b-card-body v-for="step of recipe.steps" class="border mb-4 border-left-0 border-right-0 border-top-0 ">
               <b-row>
                 <b-col>
-                  <strong v-if="step.category">{{ step.category }}</strong>
+                  <h6 v-if="step.category">{{ step.category }}</h6>
                 </b-col>
               </b-row>
-              <b-row class="mb-4">
+              <b-row>
                 <b-col>
                   <p>
                     {{ step.step }}
                   </p>
-                  <b-table thead-class="d-none" small v-if="step.ingredients.length > 0" :fields="ingredientTableFields" :items="step.ingredients">
+                  <b-table thead-class="d-none" small v-if="step.ingredients && step.ingredients.length > 0" :fields="ingredientTableFields" :items="step.ingredients">
                     <template slot="amount" slot-scope="data">
                       {{ convertMeasurement(data.item) }}
                     </template>
                   </b-table>
+                  <b-btn @click="startTimer" size="sm" class="" variant="primary">
+                    <timer-icon></timer-icon> Start 3-4 hour timer
+                  </b-btn>
+
                 </b-col>
                 <b-col md="6">
                   <img class="w-100" src="/static/bread.jpg" />
                 </b-col>
               </b-row>
-            </div>
+            </b-card-body>
           </b-card>
         </b-col>
       </b-row>
@@ -104,7 +122,12 @@ export default {
         {
           category: 'Steps'
         }
-      ]
+      ],
+      timer: {
+        start: null,
+        end: null,
+        timeLeft: 0
+      }
     }
   },
   components: {
@@ -143,6 +166,26 @@ export default {
         return (ingredient.amount / 120).toFixed(2) + 'cups'
       }
     },
+    endTimer: function () {
+      clearInterval(this.t)
+    },
+    startTimer: function () {
+      var that = this
+      this.timer.start = moment()
+      this.timer.end = moment().add(3, 'hours')
+      function getFreshTime () {
+        var now = moment()
+        var diff = moment.duration(that.timer.end.diff(now))
+        var hours = diff.hours()
+        var minutes = diff.minutes()
+        var seconds = diff.seconds()
+        that.timer.timeLeft = hours + ':' + minutes + ':' + seconds
+      }
+      this.t = setInterval(function () {
+        getFreshTime()
+      }, 1000)
+      getFreshTime()
+    },
     getRecipe: function (recipe) {
       // this.$router.push('recipe/' + recipe._id + '/edit')
       if (!recipe) recipe = {_id: this.$route.path.replace('recipe', '').replace('edit', '').replace(/\//gi, '')}
@@ -158,7 +201,7 @@ export default {
       const margin = 50
       const barHeight = 20
       const height = barHeight * numberOfSteps + margin
-      console.log(document.getElementById('scheduler').style.width)
+
       const width = 569 - margin
       const primary = '#808080'
       // '#ff3300'
@@ -174,49 +217,49 @@ export default {
       let maxDate = moment()
       let minEndDate
 
-      const data = this.$store.state.recipe.steps
+      // const data = this.$store.state.recipe.steps
 
-      for (var step of data) {
-        step.timeMin = (Math.random() * 4) + 1
-        step.timeMax = step.timeMin + (Math.random() * 2)
-      }
-      // [
-      //   {
-      //     'category': 'Levain',
-      //     'timeMin': 5,
-      //     'timeMax': 6
-      //   },
-      //   {
-      //     'category': 'Mix',
-      //     'timeMin': 1,
-      //     'timeMax': 1
-      //   },
-      //   {
-      //     'category': 'Salt',
-      //     'timeMin': 1,
-      //     'timeMax': 1
-      //   },
-      //   {
-      //     'category': 'Bulk',
-      //     'timeMin': 3,
-      //     'timeMax': 4
-      //   },
-      //   {
-      //     'category': 'Divide and Preshape',
-      //     'timeMin': 1,
-      //     'timeMax': 1
-      //   },
-      //   {
-      //     'category': 'Proof',
-      //     'timeMin': 3,
-      //     'timeMax': 4
-      //   },
-      //   {
-      //     'category': 'Bake',
-      //     'timeMin': 1,
-      //     'timeMax': 1
-      //   }
-      // ]
+      // for (var step of data) {
+      //   step.timeMin = (Math.random() * 4) + 1
+      //   step.timeMax = step.timeMin + (Math.random() * 2)
+      // }
+      let data = [
+        {
+          'category': 'Levain',
+          'timeMin': 5,
+          'timeMax': 6
+        },
+        {
+          'category': 'Mix',
+          'timeMin': 1,
+          'timeMax': 1
+        },
+        {
+          'category': 'Salt',
+          'timeMin': 1,
+          'timeMax': 1
+        },
+        {
+          'category': 'Bulk',
+          'timeMin': 3,
+          'timeMax': 4
+        },
+        {
+          'category': 'Divide and Preshape',
+          'timeMin': 1,
+          'timeMax': 1
+        },
+        {
+          'category': 'Proof',
+          'timeMin': 3,
+          'timeMax': 4
+        },
+        {
+          'category': 'Bake',
+          'timeMin': 1,
+          'timeMax': 1
+        }
+      ]
 
       // Add previous minMax times together
       var i = 0

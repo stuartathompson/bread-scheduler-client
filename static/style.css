@@ -9,9 +9,14 @@ strong{
 .text-primary{
   color:#ff3300 !important
 }
+.bg-primary{
+  background-color:#ff3300 !important
+}
 .btn-primary{
   background-color:#ff3300 !important;
   border:none;
+}
+hr.primary{
 }
 a:hover{
   color:#333 !important;
@@ -21,6 +26,12 @@ a.text-primary:hover, .text-primary a:hover{
 }
 table tr td:nth-child(2){
   width:100%;
+}
+.table-sm{
+  font-size:.8rem;
+}
+.table-no-top-rule tbody tr:first-child td{
+  border-top:0;
 }
 .text-bold{
   font-weight:600;
@@ -35,6 +46,15 @@ table tr td:nth-child(2){
 }
 h2 a{
   color:#333;
+}
+h3{
+  font-size:1.6rem;
+}
+h4{
+  font-size:1.5rem;
+}
+h5{
+  font-size:1.4rem;
 }
 h6{
   font-size:1.3rem;
@@ -53,6 +73,9 @@ h6{
 .card-body{
   padding:2rem;
 }
+.card .card-body:last-child{
+  border-bottom:0 !important;
+}
 .bg-black{
   background-color:black;
 }
@@ -69,4 +92,26 @@ h6{
   bottom:10%;
   left:10%;
   padding:20px 10px;
+}
+.timer{
+  position: fixed;
+  bottom:0;
+  background:#fff;
+  right:20px;
+  z-index: 99;
+  max-width:175px;
+}
+.big-num{
+  font-family: 'Neuton', serif;
+  letter-spacing:-.5px;
+  font-size:2rem;
+  line-height: 0;
+}
+.big-num span{
+  font-size:1.2rem;
+}
+.timer p{
+  font-size:.9rem;
+  margin-top:15px;
+  margin-bottom:0;
 }

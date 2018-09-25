@@ -4,7 +4,7 @@
       <b-card @click="openRecipe(recipe)" class="text-center cover-card bg-light">
         <div>
           <star-icon v-for="i in [1, 2, 3, 4, 5]"></star-icon>
-          <h2><b-link>County Bread</b-link></h2>
+          <h2><b-link>County Fair Blue Ribbon Bread</b-link></h2>
           <p class="card-text">
             A full-flavored, open crumb, Tartine-inspired sourdough. Start now and eat this bread by <strong class="text-primary"><timer-icon></timer-icon> 2 p.m.</strong> tomorrow
           </p>
