@@ -1,13 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 // import Home from '@/components/Home'
-import Records from '@/components/Records'
+import Recipes from '@/components/Recipes'
+import Recipe from '@/components/Recipe'
 import Login from '@/components/Login'
 import Logout from '@/components/Logout'
-import Flash from '@/components/Flash'
 import Register from '@/components/Register'
-import addrecord from '@/components/AddRecord'
-import editrecord from '@/components/EditRecord'
+import Calendar from '@/components/Calendar'
+import addRecipe from '@/components/AddRecipe'
+import editRecipe from '@/components/EditRecipe'
 import PageNotFound from '@/components/PageNotFound'
 
 Vue.use(Router)
@@ -21,24 +22,28 @@ export default new Router({
       component: Login
     },
     {
-      path: '/flash',
-      name: 'flash',
-      component: Flash
-    },
-    {
       path: '/',
-      name: 'Records',
-      component: Records
+      name: 'Recipes',
+      components: {
+        default: Recipes
+      }
     },
     {
-      path: '/records/add',
-      component: addrecord,
-      name: 'addrecord'
+      path: '/recipe/:id',
+      name: 'Recipe',
+      components: {
+        default: Recipe
+      }
     },
     {
-      path: '/records/:id/edit',
-      component: editrecord,
-      name: 'editrecord'
+      path: '/recipes/add',
+      component: addRecipe,
+      name: 'addrecipe'
+    },
+    {
+      path: '/recipe/:id/edit',
+      component: editRecipe,
+      name: 'editRecipe'
     },
     {
       path: '/register',
@@ -49,6 +54,11 @@ export default new Router({
       path: '/logout',
       component: Logout,
       name: 'logout'
+    },
+    {
+      path: '/calendar',
+      component: Calendar,
+      name: 'calendar'
     },
     {
       path: '*',

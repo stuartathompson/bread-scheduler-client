@@ -1,13 +1,19 @@
 <template>
-  <div class="login container-fluid p-6">
+  <div class="login container-fluid p-5">
     <b-row>
-      <b-col md="12">
-        <h4>Register {{ username }}</h4>
+      <b-col class="mx-auto" lg="4" md="5" sm="6" xs="12">
+        <h5 class="mt-4 mb-4 text-center">Register</h5>
         <b-card>
           <b-form-group>
-            <b-input id="username" v-model="username" type="text" placeholder="Username"></b-input>
-            <b-input id="password" type="password" v-model="password" placeholder="Password"></b-input>
-            <b-button @click="register" type="submit" variant="primary">Register</b-button>
+            <b-form @submit="register">
+              <b-input class="mb-3" id="username" v-model="username" type="text" placeholder="Username"></b-input>
+              <b-input class="mb-3" id="password" type="password" v-model="password" placeholder="Password"></b-input>
+              <b-dropdown size="sm" text="Select a user role" class="mb-3" style="width:100%">
+                <b-dropdown-item-button>User</b-dropdown-item-button>
+                <b-dropdown-item-button>Admin</b-dropdown-item-button>
+              </b-dropdown>
+              <b-button type="submit" variant="primary">Register</b-button>
+            </b-form>
           </b-form-group>
         </b-card>
       </b-col>

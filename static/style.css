@@ -1,74 +1,72 @@
-body,.btn,input,.form-control{
-  font-size:.85rem;
+body{
+  font-weight:300;
+  font-size:.95rem;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
-thead th{
-  border-top:0 !important;
+strong{
+  font-weight:600;
 }
-.sidebar,.logo{
-  border-right: 1px solid rgba(0,0,0,.0625);
+.text-primary{
+  color:#ff3300 !important
 }
-.records{
-  width:100%
+.btn-primary{
+  background-color:#ff3300 !important;
+  border:none;
 }
-.nav, .nav a{
+a:hover{
+  color:#333 !important;
+}
+a.text-primary:hover, .text-primary a:hover{
+  color:#ff3300 !important;
+}
+table tr td:nth-child(2){
+  width:100%;
+}
+.text-bold{
+  font-weight:600;
+  letter-spacing: -.5;
+}
+.text-caps{
+  text-transform: uppercase;
+}
+.logo, h1, h2, h3, h4, h5, h6{
+  font-family: 'Neuton', serif;
+  letter-spacing:-.5px;
+}
+h2 a{
   color:#333;
-  font-size:.9rem;
-  min-width:200px;
-  margin:0;
 }
-.nav .btn{
-  width:100%;
-  text-align: left;
+h6{
+  font-size:1.3rem;
 }
-.sidebar.nav ul{
-  list-style-type:none;
-  margin:0;
-  padding:0;
+.logo .material-design-icon{
+  font-size:1rem;
+  margin-right:5px;
 }
-.sidebar.nav ul{
+.logo{
+  font-size:1.25rem
 }
-.sidebar.nav ul li{
-  width:100%;
-  padding:0;
-  margin:0;
+.cover-card{
+  border-radius:0;
+  border:0;
 }
-.sidebar.nav ul li a{
-  padding:.8rem 1rem;
+.card-body{
+  padding:2rem;
 }
-.sidebar.nav ul li a:hover{
-  background-color: rgba(0, 0, 0, 0.03);
+.bg-black{
+  background-color:black;
 }
-.sidebar.nav ul li.nav-item{
+.cover{
+  height:100vh;
+  max-height:600px;
+  position: relative;
+  background-size:cover;
+  background-position: 50% 75%;
 }
-.card-body table.table{
-  margin-bottom:0;
-}
-.table th{
-  font-weight:100;
-}
-.table td{
-  min-width:150px;
-}
-.table.no-top-line tr:first-child td, .table.no-top-line tr:first-child th{
-  border-top:0;
-  padding-top:0;
-}
-.table-hover tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-.card-body h5{
-  font-size: .9rem;
-  padding: .6rem;
-  font-weight: 500;
-}
-.vdp-datepicker__calendar .cell.selected {
-    background: #437BEE;
-    color:white;
-}
-.vdp-datepicker__calendar .cell.selected:hover {
-    background: #437BEE;
-    color:white;
-}
-.form-control[readonly] {
-  background-color: white;
+.cover-card{
+  max-width:300px;
+  position: absolute;
+  bottom:10%;
+  left:10%;
+  padding:20px 10px;
 }

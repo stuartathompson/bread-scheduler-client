@@ -3,7 +3,7 @@
     <b-row>
       <b-col md="6">
         <h2>404</h2>
-          <h4>Our apologies. The page was not found.</h4>
+        <h4>Sorry, that page was not found.</h4>
       </b-col>
     </b-row>
   </div>

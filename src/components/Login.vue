@@ -1,17 +1,18 @@
 <template>
-  <div class="login container-fluid p-5">
+  <div class="login container-fluid p-3 p-sm-3 p-md-5">
     <b-row>
-      <b-col class="mx-auto" md="3">
-        <h4 class="mt-4 text-center mb-4">
-          <span v-if="message">{{ message }}</span>
-          <span v-else>Welcome. Please log in.</span>
-        </h4>
+      <b-col class="mx-auto" lg="4" md="5" sm="6" xs="12">
+        <h5 class="mt-4 text-center mb-4">
+          Welcome. Please log in.
+        </h5>
         <b-card>
           <b-form-group>
-            <b-alert variant="danger" v-if="error" class="text-center" :show="error">Sorry, that didn't work. Try again.</b-alert>
-            <b-input id="username" v-model="username" type="text" placeholder="Email" class="mb-3"></b-input>
-            <b-input id="password" type="password" v-model="password" placeholder="Password" class="mb-3"></b-input>
-            <b-button @click="login" type="submit" variant="primary">Log In</b-button>
+            <b-form @submit="login">
+              <b-alert variant="danger" v-if="error" class="text-center" :show="error">Sorry, that didn't work. Try again.</b-alert>
+              <b-input id="username" autofocus v-model="username" type="text" placeholder="Email" class="mb-3"></b-input>
+              <b-input id="password" type="password" v-model="password" placeholder="Password" class="mb-3"></b-input>
+              <b-button type="submit" variant="primary">Log In</b-button>
+            </b-form>
           </b-form-group>
         </b-card>
       </b-col>
@@ -33,10 +34,18 @@ export default {
       message: ''
     }
   },
+  created () {
+  },
   mounted () {
+    this.auth()
     this.getMessage()
   },
   methods: {
+    auth () {
+      if (localStorage.getItem('token')) {
+        this.$router.push({name: 'Records'})
+      }
+    },
     getMessage () {
       this.message = this.$route.params ? this.$route.params.message : ''
     },
@@ -46,16 +55,19 @@ export default {
     },
     async login () {
       const response = await UsersService.login({username: this.username, password: this.password})
-      console.log('response', response)
       this.error = !response.data.success
       this.success = response.data.success
       if (this.success) {
         if (response.data.token) {
+          localStorage.removeItem('token')
           localStorage.setItem('token', response.data.token)
-          this.$root.$emit('authStatus', true)
+          localStorage.setItem('username', response.data.username)
+          // this.$root.$emit('authStatus', true)
+          this.$store.commit('authStatus', true)
           if (response.data.redirect) {
-            // window.location.href = response.data.redirect
-            this.$router.push(response.data.redirect)
+            this.$nextTick(function () {
+              this.$router.push(response.data.redirect)
+            })
           }
         }
       }
