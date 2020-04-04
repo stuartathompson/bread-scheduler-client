@@ -42,9 +42,11 @@ export default {
   },
   methods: {
     auth () {
-      if (localStorage.getItem('token')) {
-        this.$router.push({name: 'Records'})
-      }
+      // if (localStorage.getItem('token')) {
+      //   this.$router.push({name: 'Records'})
+      // }
+      var userPromise = window.weasl.login()
+      console.log(userPromise)
     },
     getMessage () {
       this.message = this.$route.params ? this.$route.params.message : ''
@@ -53,7 +55,8 @@ export default {
       const response = await UsersService.getLogin()
       this.error = response.data.error === 'invalid'
     },
-    async login () {
+    async login (e) {
+      e.preventDefault()
       const response = await UsersService.login({username: this.username, password: this.password})
       this.error = !response.data.success
       this.success = response.data.success

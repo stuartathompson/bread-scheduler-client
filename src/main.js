@@ -3,8 +3,10 @@
 import Vue from 'vue'
 import 'es6-promise/auto'
 import Vuex from 'vuex'
+import Meta from 'vue-meta'
 import App from './App'
 import router from './router'
+import moment from 'moment'
 import BootstrapVue from 'bootstrap-vue'
 import FilePlusIcon from 'vue-material-design-icons/FilePlus.vue'
 import FileIcon from 'vue-material-design-icons/File.vue'
@@ -12,20 +14,37 @@ import TableIcon from 'vue-material-design-icons/TableOfContents.vue'
 import LogoutIcon from 'vue-material-design-icons/Logout.vue'
 import EditIcon from 'vue-material-design-icons/Pencil.vue'
 import PlusIcon from 'vue-material-design-icons/Plus.vue'
+import MinusIcon from 'vue-material-design-icons/Minus.vue'
 import StarIcon from 'vue-material-design-icons/Star.vue'
 import HomeIcon from 'vue-material-design-icons/Home.vue'
+import DecagramIcon from 'vue-material-design-icons/Decagram.vue'
 import TimerIcon from 'vue-material-design-icons/Timer.vue'
+import ChartTimeline from 'vue-material-design-icons/ChartTimeline.vue'
 import MinimizeIcon from 'vue-material-design-icons/WindowMinimize.vue'
 import LoadingIcon from 'vue-material-design-icons/Loading.vue'
-import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeftBold.vue'
+import ArrowLeftIcon from 'vue-material-design-icons/ChevronLeft.vue'
 import CloseIcon from 'vue-material-design-icons/Close.vue'
 import Calendar from 'vue-material-design-icons/Calendar.vue'
 
 import RecipeService from './services/RecipeService'
 import UsersService from './services/UsersService'
 
+import VueAnalytics from 'vue-analytics'
+
 Vue.use(Vuex)
 Vue.use(BootstrapVue)
+Vue.use(Meta, {
+  keyName: 'metaInfo',
+  attribute: 'data-vue-meta',
+  ssrAttribute: 'data-vue-meta-server-rendered',
+  tagIDKeyName: 'vmid'
+})
+Vue.use(VueAnalytics, {
+  id: 'UA-131216018-1',
+  router,
+  checkDuplicatedScript: true
+})
+
 Vue.component('file-plus-icon', FilePlusIcon)
 Vue.component('file-icon', FileIcon)
 Vue.component('table-icon', TableIcon)
@@ -33,8 +52,11 @@ Vue.component('logout-icon', LogoutIcon)
 Vue.component('timer-icon', TimerIcon)
 Vue.component('edit-icon', EditIcon)
 Vue.component('plus-icon', PlusIcon)
+Vue.component('minus-icon', MinusIcon)
 Vue.component('star-icon', StarIcon)
 Vue.component('home-icon', HomeIcon)
+Vue.component('decagram-icon', DecagramIcon)
+Vue.component('chart-timeline-icon', ChartTimeline)
 Vue.component('minimize-icon', MinimizeIcon)
 Vue.component('arrow-left-icon', ArrowLeftIcon)
 Vue.component('loading-icon', LoadingIcon)
@@ -49,32 +71,66 @@ require('../static/style.css')
 
 Vue.config.productionTip = false
 
+let defaultTimer = window.localStorage.getItem('timer') ? JSON.parse(window.localStorage.getItem('timer')) : {
+  start: null,
+  end: null,
+  timeLeft: 0,
+  showing: false,
+  minimize: false,
+  finishTimeMax: null,
+  finishTimeMin: null,
+  t: null,
+  ringing: false
+}
+
 const store = new Vuex.Store({
   state: {
     count: 0,
     recipes: null,
+    addHours: 0,
     allRecords: null,
-    recipe: {
-    },
+    recipe: {},
+    userRecipe: {},
+    startDate: null,
+    endDate: null,
     authStatus: false,
     editing: true,
     editing_id: '',
     loadingMore: false,
-    noRecords: false
+    noRecords: false,
+    timer: defaultTimer
   },
   mutations: {
+    timer (state, params) {
+      state.timer[params.prop] = params.val
+      window.localStorage.setItem('timer', JSON.stringify(state.timer))
+    },
     increment (state) {
       state.count++
     },
     authStatus (state, authStatus) {
-      console.log('setting authstatus', authStatus)
       state.authStatus = authStatus
     },
     loadingMore (state, loadingMore) {
       state.loadingMore = loadingMore
     },
-    recipe (state, recipe) {
-      state.recipe = recipe
+    userRating (state, userRating) {
+      state.recipe.userRating = userRating
+    },
+    addHours (state, addHours) {
+      state.addHours = addHours
+    },
+    startDate (state, startDate) {
+      state.startDate = startDate
+    },
+    endDate (state, endDate) {
+      state.endDate = endDate
+    },
+    userRecipe (state, params) {
+      state.userRecipe = params.recipe
+    },
+    recipe (state, params) {
+      state.recipe = params.recipe
       // if (record === null) {
       //   state.record = {
       //     _id: '',
@@ -123,9 +179,7 @@ const store = new Vuex.Store({
           state.recipes.push(newRecipe)
         }
       } else {
-        console.log('ok', params)
         state.recipes = params.recipes
-        console.log('state', state.recipes)
       }
     },
     allRecords (state, allRecipes) {
@@ -146,19 +200,21 @@ const store = new Vuex.Store({
       localStorage.removeItem('token')
       localStorage.removeItem('username')
       state.commit('authStatus', false)
-      router.push({ name: 'login', params: {message: 'You’ve been logged out.'} })
+      router.push({ name: 'Recipes' })
     },
     async auth (state) {
       if (!localStorage.getItem('token')) {
         // No token, so must log in
-        state.dispatch('logout')
+        state.commit('authStatusm', false)
+        // state.dispatch('logout')
       } else {
         const response = await UsersService.auth({ token: localStorage.getItem('token') })
         if (response.data.success) {
           state.commit('authStatus', true)
         } else {
           // Invalid token, so must log in
-          state.dispatch('logout')
+          // state.dispatch('logout')
+          state.commit('authStatus', false)
         }
       }
       // const token = localStorage.getItem('token')
@@ -171,17 +227,16 @@ const store = new Vuex.Store({
       //   this.$router.push({ name: 'login', params: { message: 'You must log in.' } })
       // }
     },
-    async updateRecord (state, params) {
-      var response = await RecipeService.updateRecord({
-        _id: params.id,
-        record_id: params.record_id,
-        description: params.description,
-        notes: params.notes,
-        date: params.date,
-        children: params.children,
-        attachments: params.attachments_results
-      })
-      state.commit('record', response.data)
+    async updateRecipe (state, params) {
+      var response = await RecipeService.updateRecipe(params)
+      state.commit('recipe', response.data)
+      if (response.data.success) {
+        router.push({path: '/recipe/' + response.data.recipe._id})
+      }
+    },
+    async updateStarRating (state, params) {
+      var response = await RecipeService.updateStarRating(params)
+      state.commit('starRating', response.data)
     },
     async searchRecords (state, params) {
       if (params.filter === '') {
@@ -196,16 +251,25 @@ const store = new Vuex.Store({
     async getRecipe (state, params) {
       // state.commit('editing_id', '')
       // state.commit('editing', false)
-      const response = await RecipeService.getRecipe({
-        id: params._id
-      })
-      state.commit('recipe', response.data)
+      // Use local if available otherwise set default on response as local
+      var localRecipe = window.localStorage.getItem(params._id)
+      // console.log('getting recipe...', localRecipe)
+      if (localRecipe) {
+        // console.log('saving')
+        state.commit('recipe', {recipe: JSON.parse(localRecipe)})
+      } else {
+        const response = await RecipeService.getRecipe({
+          id: params._id
+        })
+        console.log(response)
+        state.commit('recipe', response.data)
+        window.localStorage.setItem('original_' + params._id, JSON.stringify(response.data.recipe))
+      }
     },
     async getRecipes (state, params) {
       // console.log('getting', params)
       if (!params) params = {}
       const response = await RecipeService.recipes(params)
-      console.log('vuex records', response)
       state.commit('loadingMore', false)
       state.commit('recipes', { recipes: response.data.recipes, append: params.append })
       // state.count = 10
@@ -233,11 +297,69 @@ const store = new Vuex.Store({
       // }
     },
     async addRecipe (state, recipe) {
-      const response = await RecipeService.addRecipe(recipe)
-      console.log(response)
+      var response = await RecipeService.addRecipe(recipe)
+      if (response.data.success) {
+        router.push({name: 'Recipes'})
+      }
+    },
+    resetTimer (state) {
+      // TODO
+    },
+    showTimer (state) {
+      // Set timer to show
+      state.commit('timer', {'prop': 'showing', 'val': true})
+      state.commit('timer', {'prop': 'ringing', 'val': false})
+      var intervalTime = () => {
+        // Trigger loop to update the data, which will update teh time
+        var diff = moment.duration(moment(state.state.timer.end).diff(moment()))
+        if (moment(state.state.timer.end).diff(moment()) <= 0) {
+          state.dispatch('endTimer')
+          state.commit('timer', {'prop': 'timeLeft', 'val': '0:00'})
+          state.commit('timer', {'prop': 'ringing', 'val': true})
+          return
+        }
+        var hours = diff.hours()
+        hours = hours === 0 ? '' : hours + ':'
+        var minutes = diff.minutes()
+        if (minutes < 10 && hours !== '') {
+          // if (minutes === 0) {
+          //   minutes += ''
+          // } else {
+          //   minutes = 0 ':'
+          // }
+          minutes = '0' + minutes
+        }
+        if (minutes !== '') {
+          minutes += ':'
+        }
+        var seconds = diff.seconds()
+        seconds = seconds < 10 ? '0' + seconds : seconds
+        this.commit('timer', {'prop': 'timeLeft', 'val': hours + minutes + seconds})
+      }
+      var t = setInterval(() => {
+        intervalTime()
+      }, 500)
+      intervalTime()
+      state.commit('timer', {'prop': 't', 'val': t})
+    },
+    endTimer (state) {
+      clearInterval(state.state.timer.t)
+      this.commit('timer', {'prop': 't', 'value': null})
+      window.localStorage.removeItem('timer')
     }
   }
 })
+
+// Edit writer
+// router.beforeEach((to, from, next) => {
+//   Vue.nextTick(() => {
+//     console.log(to, from, to.meta.title, store.state.recipe)
+//     var defaultTitle = 'Bread recipes, planner and timer for better sourdough'
+//     var title = to.meta.title === 'recipe.title' ? store.state.recipe.title : defaultTitle
+//     document.title = 'Bread Scheduler – ' + title
+//   })
+//   next()
+// })
 
 /* eslint-disable no-new */
 new Vue({

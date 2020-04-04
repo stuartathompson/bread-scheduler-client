@@ -24,8 +24,7 @@ export default {
   methods: {
     async getLogout () {
       console.log('logging out')
-      localStorage.removeItem('token')
-      window.location = '/login'
+      this.$store.dispatch('logout')
     }
   }
 }

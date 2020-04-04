@@ -14,8 +14,8 @@ export default {
     return Api().post('add_image', params, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
 
-  updateRecord (params) {
-    return Api().put('records/' + params._id, params)
+  updateRecipe (params) {
+    return Api().put('recipe/' + params._id, params)
   },
 
   getRecipe (params) {

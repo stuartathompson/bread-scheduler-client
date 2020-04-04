@@ -5,6 +5,8 @@ import Recipes from '@/components/Recipes'
 import Recipe from '@/components/Recipe'
 import Login from '@/components/Login'
 import Logout from '@/components/Logout'
+import About from '@/components/About'
+import Contact from '@/components/Contact'
 import Register from '@/components/Register'
 import Calendar from '@/components/Calendar'
 import addRecipe from '@/components/AddRecipe'
@@ -15,6 +17,9 @@ Vue.use(Router)
 
 export default new Router({
   mode: 'hash',
+  scrollBehavior () {
+    return { x: 0, y: 0 }
+  },
   routes: [
     {
       path: '/login',
@@ -33,6 +38,23 @@ export default new Router({
       name: 'Recipe',
       components: {
         default: Recipe
+      },
+      meta: {
+        title: 'recipe.title'
+      }
+    },
+    {
+      path: '/about',
+      name: 'About',
+      components: {
+        default: About
+      }
+    },
+    {
+      path: '/contact',
+      name: 'Contact',
+      components: {
+        default: Contact
       }
     },
     {

@@ -8,10 +8,6 @@
             <b-form @submit="register">
               <b-input class="mb-3" id="username" v-model="username" type="text" placeholder="Username"></b-input>
               <b-input class="mb-3" id="password" type="password" v-model="password" placeholder="Password"></b-input>
-              <b-dropdown size="sm" text="Select a user role" class="mb-3" style="width:100%">
-                <b-dropdown-item-button>User</b-dropdown-item-button>
-                <b-dropdown-item-button>Admin</b-dropdown-item-button>
-              </b-dropdown>
               <b-button type="submit" variant="primary">Register</b-button>
             </b-form>
           </b-form-group>
@@ -38,13 +34,15 @@ export default {
     async register () {
       console.log('ok trying')
       const response = await UsersService.register({username: this.username, password: this.password})
+      console.log(response)
       if (this.success) {
         if (response.data.token) {
           localStorage.setItem('token', response.data.token)
         }
+      } else {
         if (response.data.redirect) {
           // window.location.href = response.data.redirect
-          // this.$router.push()
+          this.$router.push(response.data.redirect)
         }
       }
     }
