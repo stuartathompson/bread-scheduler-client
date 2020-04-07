@@ -4,7 +4,7 @@
       <b-col sm="6" class="m-auto text-center">
         <h1>Sourdough. Made easier.</h1>
         <p class="text-very-large text-hint">
-          <timer-icon></timer-icon> Bread Scheduler helps you plan your bread-baking so you can focus on everything else that’s important to you. 
+          <timer-icon></timer-icon> Bread Scheduler helps you plan your bread-baking so you can focus on everything else that’s important to you.
         </p>
       </b-col>
     </b-row>
