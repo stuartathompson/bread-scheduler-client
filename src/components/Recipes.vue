@@ -29,7 +29,7 @@
           <b-row>
             <b-col sm="8 m-auto" md="7 m-auto">
               <p class="text-large">
-                We take bread recipes and time them for an easier bake. Use these tools, timers and schedulers help you make bread.
+                We take bread recipes and time them for an easier bake. Use these tools, timers and schedulers help you make better bread.
               </p>
               <hr class="d-block d-sm-none" />
             </b-col>
@@ -41,7 +41,7 @@
           <b-card
           @click="openRecipe(recipe)"
           :title="recipe.title"
-          :img-src="image(recipe) | thumbnail"
+          :img-src="thumbnailImage(recipe)"
           class="recipes-card cursor">
             <div v-if="index === 3" class="decagram d-absolute text-extra-large text-primary starred-recipe">
               <decagram-icon></decagram-icon>
@@ -149,6 +149,9 @@ export default {
     },
     image: function (recipe) {
       return recipe.localImage ? recipe.localImage : recipe.images ? recipe.images[0] ? recipe.images[0].secure_url : 'static/bread2.jpg' : 'static/bread2.jpg'
+    },
+    thumbnailImage: function (recipe) {
+      return recipe.localThumb ? recipe.localThumb : recipe.localImage ? recipe.localImage : recipe.images ? recipe.images[0] ? recipe.images[0].secure_url : 'static/bread2.jpg' : 'static/bread2.jpg'
     },
     startTime: function (step) {
       // var totalMaxTime = step

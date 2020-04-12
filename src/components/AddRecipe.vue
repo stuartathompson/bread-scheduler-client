@@ -33,6 +33,14 @@
               <label for="file" class="btn btn-sm p-0 text-muted"><plus-icon></plus-icon> Upload</label>
               </label>
               <input hidden type="file" id="file" ref="file" @change="onFileChange" name="attachments" multiple class=""/>
+              <div class="mb-2">
+                <b-col>
+                  <strong>Local image</strong>
+                  <b-input v-model="recipe.localImage" placeholder=""></b-input>
+                  <strong>Local thumb</strong>
+                  <b-input v-model="recipe.localThumb" placeholder=""></b-input>
+                </b-col>
+              </div>
             </b-col>
           </b-row>
           <b-row>

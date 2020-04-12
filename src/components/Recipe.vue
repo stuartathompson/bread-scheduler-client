@@ -1,7 +1,7 @@
 <template>
-  <div class="recipe mt-2">
+  <div class="recipe mt-2" :key="">
     <b-container fluid>
-      <b-row class="pb-5">
+      <b-row class="pb-5 mobile-w-100">
         <b-col xs=12>
             <div class="cover" :style="image">&nbsp;</div>
         </b-col>
@@ -14,15 +14,15 @@
       <b-row class="">
         <b-col class="">
           <div class="pt-3 mt-2 pb-3 mb-2 border border-left-0 border-right-0">
-            <div class="d-inline d-sm-inline mr-4"><span class="text-primary mr-1">Total Time</span> {{ recipe.totalRecipeLength | hours }}</div>
             <div class="d-inline d-sm-inline mr-4"><span class="text-primary mr-1">Ideal Start Time</span> {{ recipe.recommendedTimes && recipe.recommendedTimes[0] ? recipe.recommendedTimes[0].startTime : 'N/A' | hoursToTime }}</div>
+            <div class="d-inline d-sm-inline mr-4"><span class="text-primary mr-1">Total Time</span> {{ recipe.totalRecipeLength | hours }}</div>
 
-            <div v-if="isBread" class="d-inline d-sm-inline mr-4"><span class="text-primary mr-1">Makes</span> {{ loaves(recipe.numberOfLoaves) }}</div>
-            <div class="d-block d-sm-inline mt-1 mr-4"><span class="text-primary mr-1">Rating</span>
+            <!-- <div v-if="isBread" class="d-inline d-sm-inline mr-4"><span class="text-primary mr-1">Makes</span> {{ loaves(recipe.numberOfLoaves) }}</div> -->
+            <!-- <div class="d-block d-sm-inline mt-1 mr-4"><span class="text-primary mr-1">Rating</span>
               <span v-for="i in starLength" @click="setStarRating(i)" @mouseover="starHover(i)" @mouseout="starHover(i, 'out')" :class="(!starActive && starSel === -1 && userRating >= i) || (!starActive && starFix >= i) || (starActive && starSel >= i)? 'cursor text-primary' : 'cursor text-dark'">
                 <star-icon></star-icon>
               </span>
-            </div>
+            </div> -->
             <b-link v-if="auth" :href="editUrl" variant="primary" class="ml-4 float-right text-secondary">Edit</b-link>
             <!-- <b-link variant="primary" class="float-right text-primary"><plus-icon></plus-icon>Save to my recipes</b-link> -->
           </div>
@@ -41,23 +41,23 @@
           <div class="pb-1">
             <strong>What you’ll need</strong>
           </div>
-          <div class="pb-1 text-medium">
+          <div class="pt-2 pb-2 text-medium">
             <b-form-radio-group class="ml-auto inline-radio text-thin text-sans-serif text-medium" v-model="preferences.measurement">
               <b-radio value="grams">Grams</b-radio>
               <b-radio value="ounces">Ounces</b-radio>
               <!-- <b-radio value="volume">Volume</b-radio> -->
             </b-form-radio-group>
-            <b-checkbox class="mb-1 mt-1" v-model="preferences.half">Halve this recipe</b-checkbox>
+            <b-checkbox class="mb-1 mt-1" v-model="preferences.double">Double this recipe</b-checkbox>
           </div>
           <template v-if="recipe && recipe.ingredients && recipe.ingredients.length > 0" v-for="ingredient of recipe.ingredients">
             <span  class="text-medium text-bold" v-if="recipe.ingredients && recipe.ingredients.length > 1">{{ ingredient.item }}</span>
             <b-table small thead-class="d-none" :items="ingredient.ingredients" :fields="ingredientTableFields" class="table-no-top-rule">
               <template v-slot:cell(amount)="data">
-                <s class="text-lighter" v-if="preferences.half">{{ convertMeasurement(data.item) }}</s>
+                <s class="text-lighter" v-if="preferences.double">{{ convertMeasurement(data.item) }}</s>
                 <template v-else>{{ convertMeasurement(data.item) }}</template>
               </template>
-              <template v-if="preferences.half" v-slot:cell(halved)="data">
-                {{ half(data.item) }}
+              <template v-if="preferences.double" v-slot:cell(halved)="data">
+                {{ double(data.item) }}
               </template>
               <template v-slot:cell(percentages)="data">
                 {{ getPercentages(ingredient, data.item) }}
@@ -81,8 +81,8 @@
             <strong>Measurements</strong><br />
           </div>
         </b-col> -->
-        <b-col xs=12 md=8 class="pt-4 pt-sm-0 ml-auto">
-          <h4>Plan Your Bake</h4>
+        <b-col xs=12 md=8 class="pt-4 pt-sm-0 ml-auto mobile-w-100">
+          <h4 class="mobile-pl mobile-pr">Plan Your Bake</h4>
           <b-card no-body>
             <!-- <b-row class="pl-4 pr-4 pb-0 pt-4">
               <b-col>
@@ -186,19 +186,21 @@
              <!-- v-if="recipe && recipe.steps.length > 0" -->
           </b-card>
 
-          <h4 class="mt-5 pb-1">Step-by-Step Instructions
+          <h4 class="mt-5 pb-1 mobile-pl mobile-pr">Step-by-Step Instructions
           </h4>
-          <b-card no-body>
+          <b-card no-body class="mobile-no-child-padding">
             <b-card-body v-for="step of recipe.steps" class="border mb-4 border-left-0 border-right-0 border-top-0 ">
               <b-row>
-                <b-col>
+                <b-col md="6" class="pb-4 mobile-no-padding d-block d-sm-block d-md-none"  v-if="stepImage(step) != ''" v-html="stepImage(step)"></b-col>
+                <b-col class="mobile-pr mobile-pl">
                   <h6 v-if="step.category"><span class="text-primary">{{ step.startTime | time }}</span><br /> {{ step.category }}</h6>
                 </b-col>
               </b-row>
               <b-row>
-                <b-col class="pb-3">
+                <b-col class="pb-3 mobile-pr mobile-pl">
                   <p>
                     {{ step.step }}
+                    <span v-if="step.category.match(/preshape|pre\-shape|pre\-round|preround/gi) !== null && preferences.double">(Since you’re making two loaves, make sure you divide the dough before you shape it.)</span>
                   </p>
                   <div class="text-medium pb-2 text-lighter" v-if="step.ingredients && step.ingredients.length > 0">
                     For this step:
@@ -208,11 +210,11 @@
                       {{ convertMeasurement(data.item) }}
                     </template>
 
-                    <template v-if="preferences.half" v-slot:cell(halved)="data">
-                      {{ half(data.item) }}
+                    <template v-if="preferences.double" v-slot:cell(halved)="data">
+                      {{ double(data.item) }}
                     </template>
                     <template v-slot:cell(amount)="data">
-                      <s class="text-lighter" v-if="preferences.half">{{ convertMeasurement(data.item) }}</s>
+                      <s class="text-lighter" v-if="preferences.double">{{ convertMeasurement(data.item) }}</s>
                       <template v-else>{{ convertMeasurement(data.item) }}</template>
                     </template>
                   </b-table>
@@ -220,12 +222,15 @@
                     <timer-icon></timer-icon> Start {{ timeToNextStep(step) | hoursSingle }} timer
                   </b-btn>
                 </b-col>
-                <b-col md="6" v-if="stepImage(step) != ''" v-html="stepImage(step)"></b-col>
+                <b-col md="6" class="pb-4 mobile-no-padding d-none d-sm-none d-sm-block" v-if="stepImage(step) != ''" v-html="stepImage(step)"></b-col>
               </b-row>
             </b-card-body>
-            <b-card-body v-if="isBread" class="border mb-4 border-left-0 border-right-0 border-top-0 ">
+            <b-card-body v-if="isBread" class="border mb-4 border-left-0 border-right-0 border-top-0 mobile-no-child-padding">
               <b-row>
-                <b-col>
+                <b-col md="6" class="pb-4 mobile-no-padding">
+                  <img class="w-100" src="static/cutting.jpg" />
+                </b-col>
+                <b-col class="mobile-pr mobile-pl">
                   <h6><span class="text-primary">
                     {{ processEndDate(endDate) | time}}</span><br />
                     Cut and enjoy
@@ -233,17 +238,23 @@
                 </b-col>
               </b-row>
               <b-row>
-                <b-col>
+                <b-col class="mobile-pl mobile-pr">
                   <p>
                     You should wait at least two hours before cutting into your loaf.
                   </p>
                 </b-col>
-                <b-col md="6">
-                  <img class="w-100" src="static/cutting.jpg" />
-                </b-col>
               </b-row>
             </b-card-body>
           </b-card>
+          <b-card-body>
+            <b-row>
+              <b-col>
+                <p class="text-lighter text-medium">
+                  Did you enjoy the recipe? <a class="" href="https://www.buymeacoffee.com/stuartathompson">Say thanks with a coffee.</a>
+                </p>
+              </b-col>
+            </b-row>
+          </b-card-body>
         </b-col>
       </b-row>
       <!-- <b-row>
@@ -279,6 +290,7 @@ export default {
       value: 10,
       max: 48,
       componentKey: 0,
+      random: Math.random(),
       tooltip: false,
       autosave: true,
       view: 'scheduler',
@@ -287,7 +299,7 @@ export default {
       selectedStartEnd: 'start',
       updateChart: null,
       dateDefaults: {
-        'start_ideal': this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0] ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment(),
+        'start_ideal': this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0].startTime ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment(),
         'start_now': moment(),
         'start_tonight': moment().startOf('day').add(19, 'h'),
         'start_tomorrow_morning': moment().add(1, 'd').startOf('day').add(9, 'h'),
@@ -320,7 +332,7 @@ export default {
       starLength: [0, 1, 2, 3, 4],
       preferences: {
         measurement: 'grams',
-        half: false
+        double: false
       },
       recipe_id: null,
       timerActive: null,
@@ -407,6 +419,14 @@ export default {
     // console.log('updated recipe')
     // this.makeViz()
   },
+  // define a watcher
+  watch: {
+    '$route.params.id' (val) {
+      // call the method which loads your initial state
+      // this.find()
+      this.$forceUpdate()
+    }
+  },
   filters: {
     time: function (time) {
       return moment(time).format('h:mm a')
@@ -419,12 +439,15 @@ export default {
     },
     hoursSingle: function (value) {
       return value >= 60 ? Math.round(value / 60) + ' hour' : value + ' minute'
+    },
+    count: function (count) {
+      return count + (count > 1 ? ' loaves' : ' loaf')
     }
   },
   computed: {
     isBread: function () {
       return this.$store.state.recipe.ingredients ? this.$store.state.recipe.ingredients.filter(d => {
-        return d.item.match(/bread/gi)
+        return d.item.match(/bread|dough/gi)
       }).length > 0 : true
     },
     userRating: function () {
@@ -494,13 +517,19 @@ export default {
       var that = this
       var data = this.$store.state.recipe.steps
 
+      // Reset start time now that recipe is fetched
+      if (this.$store.state.recipe.recommendedTimes) console.log('adding', this.$store.state.recipe.recommendedTimes[0].startTime, 'to', moment().startOf('day'), moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h'))
+      this.dateDefaults['start_ideal'] = this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0].startTime ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment()
+
+      this.dateDefaults['finish_ideal'] = this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0] ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment()
+
       // Default to the ideal start time
       this.skedStartDate = this.dateDefaults['start_ideal']
 
       // Clear content
       document.getElementById('scheduler').innerHTML = ''
 
-      const numberOfSteps = data.length
+      const numberOfSteps = data.length // - (data.filter(d => d.category.match(/fold/gi) !== null).length - 1)
       const margin = 50
       const barHeight = 10
       const barMargin = 30
@@ -1140,7 +1169,7 @@ export default {
       // }
     },
     loaves: function (loaves) {
-      loaves = this.preferences.half ? loaves / 2 : loaves
+      loaves = this.preferences.double ? loaves * 2 : loaves
       return !loaves ? '1 loaf' : loaves === 1 ? '1 loaf' : loaves + ' loaves'
     },
     setStarRating: function (i) {
@@ -1174,8 +1203,8 @@ export default {
     thumbnail: function (url) {
       return url.replace('image/upload/', 'image/upload/c_scale,w_348/')
     },
-    half: function (step) {
-      return this.convertMeasurement({amount: step.amount / 2})
+    double: function (step) {
+      return this.convertMeasurement({amount: step.amount * 2})
     },
     processEndDate: function (endDate) {
       return moment(endDate).add(2, 'h')

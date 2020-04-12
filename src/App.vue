@@ -22,7 +22,7 @@
       </div>
       <div class="nav-bar ml-0 mr-0 ml-sm-5 mr-sm-5 p-3 text-dark text-large">
         <router-link to="/" class="text-primary logo"><timer-icon></timer-icon>Bread Scheduler</router-link>
-        <div class="float-right mt-1 mt-sm-2 ml-4"><a href="http://www.breadscheduler.com/#/recipe/5e89e208aa3c8d002393a317" class="text-dark"><span class="d-md-inline">Make a starter</span></a></div>
+        <div class="float-right mt-1 mt-sm-2 ml-4"><router-link to="/recipe/5e89e208aa3c8d002393a317" class="text-dark"><span class="d-md-inline">Make a starter</span></router-link></div>
         <div class="d-none d-sm-none d-md-block float-right mt-1 mt-sm-2 ml-4"><router-link to="/" class="text-dark">All our recipes</router-link></div>
         <div class="float-right mt-1 mt-sm-2 ml-4"><router-link to="/contact" class="text-dark">About <span class="d-none d-md-inline">Bread Scheduler</span></router-link></div>
       </div>
@@ -37,7 +37,7 @@
         <div class="container ml-2">
           <div class="row">
             <div class="col">
-              <timer-icon></timer-icon> Bread Scheduler © {{ year }}. All rights reserved.
+              <timer-icon></timer-icon> Bread Scheduler © {{ year }}. All rights reserved. Like the site? <a href="https://www.buymeacoffee.com/stuartathompson">Say thanks with a coffee.</a>
             </div>
           </div>
         </div>

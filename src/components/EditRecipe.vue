@@ -51,8 +51,10 @@
               <input hidden type="file" id="file" ref="file" @change="onFileChange" name="attachments" multiple class=""/>
               <div class="mb-2">
                 <b-col>
-                  <h6>Local image</h6>
+                  <strong>Local image</strong>
                   <b-input v-model="recipe.localImage" placeholder=""></b-input>
+                  <strong>Local thumb</strong>
+                  <b-input v-model="recipe.localThumb" placeholder=""></b-input>
                 </b-col>
               </div>
             </b-col>
@@ -109,7 +111,7 @@
                 <h6>Steps</h6>
               </b-col>
             </b-row>
-            <div class="mb-2" v-for="step of recipe.steps">
+            <div class="pb-3 mb-2 border-top-0 border-left-0 border-right-0 border" v-for="step of recipe.steps">
               <b-row class="mb-2">
                 <b-col sm="3" class="pr-0">
                   <b-input placeholder="Bulk" v-model="step.category"></b-input>
@@ -166,6 +168,7 @@
                 <b-col offset="3">
                   <b-link @click="addIngredientToStep(step)"><plus-icon></plus-icon>Ingredient</b-link><br />
                   <b-link @click="addTimeBreakToStep(step)"><plus-icon></plus-icon>Time Break</b-link>
+                  <b-link class="float-right text-danger" @click="deleteStep(step)"><minus-icon></minus-icon>Delete step</b-link>
                 </b-col>
               </b-row>
             </div>
@@ -372,6 +375,9 @@ export default {
       this.recipe.recommendedTimes.push({
         'startTime': ''
       })
+    },
+    deleteStep (step) {
+      this.recipe.steps.splice(this.recipe.steps.indexOf(step), 1)
     },
     addStep () {
       this.recipe.steps.push({
