@@ -25,6 +25,7 @@ import LoadingIcon from 'vue-material-design-icons/Loading.vue'
 import ArrowLeftIcon from 'vue-material-design-icons/ChevronLeft.vue'
 import CloseIcon from 'vue-material-design-icons/Close.vue'
 import Calendar from 'vue-material-design-icons/Calendar.vue'
+import Check from 'vue-material-design-icons/Check.vue'
 
 import RecipeService from './services/RecipeService'
 import UsersService from './services/UsersService'
@@ -62,6 +63,7 @@ Vue.component('arrow-left-icon', ArrowLeftIcon)
 Vue.component('loading-icon', LoadingIcon)
 Vue.component('close-icon', CloseIcon)
 Vue.component('calendar-icon', Calendar)
+Vue.component('check-icon', Check)
 
 import 'vue-material-design-icons/styles.css'
 import 'bootstrap/dist/css/bootstrap.css'

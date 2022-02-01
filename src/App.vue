@@ -20,11 +20,14 @@
           </audio>
         </div>
       </div>
-      <div class="nav-bar ml-0 mr-0 ml-sm-5 mr-sm-5 p-3 text-dark text-large">
-        <router-link to="/" class="text-primary logo"><timer-icon></timer-icon>Bread Scheduler</router-link>
-        <div class="float-right mt-1 mt-sm-2 ml-4"><router-link to="/recipe/5e89e208aa3c8d002393a317" class="text-dark"><span class="d-md-inline">Make a starter</span></router-link></div>
-        <div class="d-none d-sm-none d-md-block float-right mt-1 mt-sm-2 ml-4"><router-link to="/" class="text-dark">All our recipes</router-link></div>
-        <div class="float-right mt-1 mt-sm-2 ml-4"><router-link to="/contact" class="text-dark">About <span class="d-none d-md-inline">Bread Scheduler</span></router-link></div>
+      <div class="nav-bar ml-0 mr-0 pl-sm-5 pr-sm-5 p-3 text-large">
+        <router-link to="/" class="logo"><div class="logo-image"></div>Bread Scheduler</router-link>
+        <div class="float-right d-none d-sm-block mt-1 mt-sm-2 ml-4"><router-link to="/recipe/5e89e208aa3c8d002393a317" class=""><span class="d-lg-inline">Make a starter</span></router-link></div>
+        <div class="d-none d-sm-none d-md-block float-right mt-1 mt-sm-2 ml-4"><router-link to="/" class="">All our recipes</router-link></div>
+        <div class="float-right mt-1 mt-sm-2 ml-4"><router-link to="/contact" class="">About <span class="d-none d-md-inline">Bread Scheduler</span></router-link></div>
+      </div>
+      <div v-if="currRoute != 'IOSApp' && currRoute != 'Recipe'" class="subnav-bar ml-0 mr-0 p-2 pl-2 text-medium bg-shadow">
+        <router-link class="text-light text-bold" to="app">iPhone app available now! →</router-link>
       </div>
       <router-view></router-view>
       <div class="container">
@@ -33,11 +36,11 @@
       <div class="m-5">&nbsp;</div>
     </div>
     <footer class="footer mt-5 page-footer bg-dark text-light">
-      <div class="footer-copyright text-thin text-medium bg-dark p-3">
+      <div class="footer-copyright text-medium bg-dark p-3">
         <div class="container ml-2">
           <div class="row">
             <div class="col">
-              <timer-icon></timer-icon> Bread Scheduler © {{ year }}. All rights reserved. Like the site? <a href="https://www.buymeacoffee.com/stuartathompson">Say thanks with a coffee.</a>
+              <timer-icon></timer-icon> Bread Scheduler © {{ year }}. All rights reserved. <router-link to="Privacy">Privacy Policy.</router-link> Made with ♥ for bakers.  Logo based on bread icon from <a href="https://icons8.com/icons/set/bread">Icons8.com</a>.
             </div>
           </div>
         </div>
@@ -85,6 +88,10 @@ export default {
           this.$store.dispatch('getRecord', record)
         }
       }
+      // else {
+      //   this.$router.push({ name: to.name })
+      // }
+      this.currRoute = this.$route.name
     }
   },
   updated () {

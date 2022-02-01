@@ -11,9 +11,6 @@
         <p>
           We started using Google Docs and recipe websites, double-checking ingredients, and trying to calculate the right time for each step. But we wanted a tool to handle this for us. That's why we made <a href="/"><span class="text-primary"><timer-icon></timer-icon>Bread Scheduler</span></a>. And it worked! All the photos here are from our actual bakes.
         </p>
-        <p>
-          Like the site? <a class="text-primary" href="https://www.buymeacoffee.com/stuartathompson">Say thanks with a coffee.</a>
-        </p>
       </b-col>
     </b-row>
     <b-row>
@@ -25,7 +22,7 @@
               We'd love to hear from you. Have feedback, comments or suggestions? Let us know.
             </p>
             <p>
-              Get in touch at <a class="text-primary" href="mailto:stuartathompson@gmail.com">stuartathompson@gmail.com</a>
+              Get in touch at <a class="text-primary" href="mailto:contact@breadscheduler.com">contact@breadscheduler.com</a>
               <p>
                 Or ping me <a class="text-primary" href="http://twitter.com/stuartathompson">on Twitter</a> or <a class="text-primary" href="http://instagram.com/breadscheduler">Instagram</a> .
               </p>

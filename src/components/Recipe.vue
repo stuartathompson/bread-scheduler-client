@@ -8,6 +8,7 @@
       </b-row>
       <b-row>
         <b-col>
+              <div class="pill mb-2" v-if="recipe.inAppPurchase && recipe.inAppPurchase.label">{{ recipe.inAppPurchase.label }}’s recipe</div>
           <h1 class="">{{ recipe.title }}</h1>
         </b-col>
       </b-row>
@@ -42,7 +43,7 @@
             <strong>What you’ll need</strong>
           </div>
           <div class="pt-2 pb-2 text-medium">
-            <b-form-radio-group class="ml-auto inline-radio text-thin text-sans-serif text-medium" v-model="preferences.measurement">
+            <b-form-radio-group class="ml-auto inline-radio text-sans-serif text-medium" v-model="preferences.measurement">
               <b-radio value="grams">Grams</b-radio>
               <b-radio value="ounces">Ounces</b-radio>
               <!-- <b-radio value="volume">Volume</b-radio> -->
@@ -105,24 +106,24 @@
                           <b-dropdown-item class="text-medium" @click="toggleButton('start')" size="sm">start</b-dropdown-item>
                           <b-dropdown-item class="text-medium" @click="toggleButton('finish')" size="sm">finish</b-dropdown-item>
                         </b-dropdown>
-                        <b-col class="d-sm-none"></b-col>
-                        this recipe
+                        <!-- <b-col class="d-sm-none"></b-col> -->
+                        <!-- this recipe -->
                         <b-dropdown size="sm" :text="selectedTime">
                           <b-dropdown-item class="text-medium" @click="toggleButton('ideal')" size="sm">at the ideal time</b-dropdown-item>
                           <b-dropdown-item v-if="selectedStartEnd === 'start'" class="text-medium" @click="toggleButton('now')" size="sm">right now</b-dropdown-item>
                           <b-dropdown-item v-if="enoughTime('tonight')" class="text-medium" @click="toggleButton('tonight')" size="sm">tonight</b-dropdown-item>
                           <b-dropdown-item v-if="enoughTime('tomorrow_morning')" class="text-medium" @click="toggleButton('tomorrow_morning')" size="sm">tomorrow morning</b-dropdown-item>
                           <b-dropdown-item v-if="enoughTime('tomorrow_night')" class="text-medium" @click="toggleButton('tomorrow_night')" size="sm">tomorrow night</b-dropdown-item>
-                          <!-- <b-dropdown-item class="text-medium" @click="toggleButton('tomorrow_night')" size="sm">pick a time</b-dropdown-item> -->
+                          <b-dropdown-item class="text-medium" @click="showCustom()" size="sm">pick a time</b-dropdown-item>
                         </b-dropdown>
-                        <!-- <b-btn @click="autoFit()" variant="primary" size="sm">Autofit</b-btn> -->
 
-                        <!-- <b-btn-group>
-                          <b-btn size="sm" @click="toggleButton('bake_now')" :variant="buttonSelected === 'bake_now' ? 'primary' : 'secondary'">Now</b-btn>
-                          <b-btn size="sm" @click="toggleButton('bake_tonight')" :variant="buttonSelected === 'bake_tonight' ? 'primary' : 'secondary'">Tonight</b-btn>
-                          <b-btn size="sm" @click="toggleButton('bake_tomorrow_morning')" :variant="buttonSelected === 'bake_tomorrow_morning' ? 'primary' : 'secondary'">Tomorrow</b-btn>
-                          <b-btn size="sm" @click="toggleButton('bake_tomorrow_night')" :variant="buttonSelected === 'bake_tomorrow_night' ? 'primary' : 'secondary'">Tomorrow night</b-btn>
-                        </b-btn-group> -->
+                        <b-dropdown v-if="customShowing" class="primary day-dropdown" :text="dayLabel" size="sm">
+                            <b-dropdown-item v-for="day in dayOptions" :key="day" class="text-medium" @click="updateCustomTime(day, 'day')" size="sm">{{ day }}</b-dropdown-item>
+                        </b-dropdown>
+                        <b-dropdown v-if="customShowing" class="primary hours-dropdown" :text="timeLabel" size="sm">
+                            <b-dropdown-item v-for="hour in hourOptions" :key="hour" class="text-medium" @click="updateCustomTime(hour, 'hour')" size="sm">{{ ampm(hour) }}</b-dropdown-item>
+                        </b-dropdown>
+
                         <b-input v-show="selectedTime === 'bake_custom'" placeholder="Choose a time"></b-input>
                     </b-col>
                     <b-col md="12" lg="4" class="text-left text-lg-right mt-2">
@@ -205,7 +206,7 @@
                   <div class="text-medium pb-2 text-lighter" v-if="step.ingredients && step.ingredients.length > 0">
                     For this step:
                   </div>
-                  <b-table thead-class="d-none" small v-if="step.ingredients && step.ingredients.length > 0" :fields="ingredientTableFields" :items="step.ingredients" class="ingredients-table">
+                  <b-table thead-class="d-none" small v-if="step.relevantIngredients && step.relevantIngredients.length > 0" :fields="ingredientTableFields" :items="getStepIngredients(step.relevantIngredients)" class="ingredients-table">
                     <template v-slot:cell(amount)="data">
                       {{ convertMeasurement(data.item) }}
                     </template>
@@ -218,16 +219,28 @@
                       <template v-else>{{ convertMeasurement(data.item) }}</template>
                     </template>
                   </b-table>
+                  <!-- Time break agenda -->
+                  <div class="text-medium pb-2 text-lighter" v-if="step.timeBreak && step.timeBreak.length > 1">
+                    Fold at these times:
+                  </div>
+                  <b-table thead-class="d-none" small v-if="step.timeBreak && step.timeBreak.length > 1" :fields="timeBreakFields" :items="filterFolds(step)" class="timebreak-table">
+                    <template v-slot:cell(timeMin)="data">
+                      {{ calculateFoldTimes(step, data.item, data.index) }}
+                    </template>
+                    <template v-slot:cell(time)="data">
+                      <span class="text-lighter">Fold #{{ data.index + 1}}</span>
+                    </template>
+                  </b-table>
                   <b-btn v-if="step.timeBreak[0]" @click="startTimer(step)" size="sm" :variant="timerActive === step && !noTimer ? 'primary' : 'secondary'">
                     <timer-icon></timer-icon> Start {{ timeToNextStep(step) | hoursSingle }} timer
                   </b-btn>
                 </b-col>
-                <b-col md="6" class="pb-4 mobile-no-padding d-none d-sm-none d-sm-block" v-if="stepImage(step) != ''" v-html="stepImage(step)"></b-col>
+                <b-col md="6" class="pb-4 mobile-no-padding d-none d-sm-none d-md-block" v-if="stepImage(step) != ''" v-html="stepImage(step)"></b-col>
               </b-row>
             </b-card-body>
             <b-card-body v-if="isBread" class="border mb-4 border-left-0 border-right-0 border-top-0 mobile-no-child-padding">
               <b-row>
-                <b-col md="6" class="pb-4 mobile-no-padding">
+                <b-col md="6" class="pb-4 mobile-no-padding d-block d-sm-block d-md-none">
                   <img class="w-100" src="static/cutting.jpg" />
                 </b-col>
                 <b-col class="mobile-pr mobile-pl">
@@ -243,15 +256,15 @@
                     You should wait at least two hours before cutting into your loaf.
                   </p>
                 </b-col>
+                <b-col md="6" class="pb-4 mobile-no-padding d-none d-sm-none d-md-block">
+                  <img class="w-100" src="static/cutting.jpg" />
+                </b-col>
               </b-row>
             </b-card-body>
           </b-card>
           <b-card-body>
             <b-row>
               <b-col>
-                <p class="text-lighter text-medium">
-                  Did you enjoy the recipe? <a class="" href="https://www.buymeacoffee.com/stuartathompson">Say thanks with a coffee.</a>
-                </p>
               </b-col>
             </b-row>
           </b-card-body>
@@ -298,6 +311,12 @@ export default {
       vizType: 'row',
       selectedStartEnd: 'start',
       updateChart: null,
+      hourOptions: d3.range(0, 24),
+      dayOptions: [
+        'today',
+        'tomorrow',
+        'yesterday'
+      ],
       dateDefaults: {
         'start_ideal': this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0].startTime ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment(),
         'start_now': moment(),
@@ -315,13 +334,18 @@ export default {
         'now': 'right now',
         'tonight': 'tonight',
         'tomorrow_morning': 'tomorrow morning',
-        'tomorrow_night': 'tomorrow night'
+        'tomorrow_night': 'tomorrow night',
+        'custom': 'pick a time'
       },
       skedStartDate: null,
       skedStartDateTarget: null,
       buttonSelected: 'now',
       days: 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(','),
-      timeOption: 'hours',
+      customTime: moment().format('k'),
+      customDay: 0,
+      timeLabel: this.ampm(moment().format('k')),
+      dayLabel: 'today',
+      customShowing: false,
       sliderHours: 0,
       // originalRecipe: Object.assign({}, this.$store.state.recipe),
       originalstartDate: this.$store.state.startDate,
@@ -349,6 +373,14 @@ export default {
         {
           key: 'percentages',
           'class': 'text-lighter text-right'
+        }
+      ],
+      timeBreakFields: [
+        {
+          key: 'timeMin'
+        },
+        {
+          key: 'time'
         }
       ],
       agendaFields: [
@@ -490,6 +522,45 @@ export default {
     // }
   },
   methods: {
+    getStepIngredients: function (relevantIngredients) {
+      var matches = []
+      for (var relevantIngredient of relevantIngredients) {
+        // Get matching group
+        var matchingGroup = this.$store.state.recipe.ingredients.find(d => d.item === relevantIngredient.group)
+        if (matchingGroup) {
+          // Get matching ingredient
+          var matchingIngredient = matchingGroup.ingredients.find(d => d.ingredient === relevantIngredient.ingredient)
+          matches.push({
+            amount: matchingIngredient.amount,
+            ingredient: matchingIngredient.ingredient
+          })
+        }
+      }
+      return matches
+    },
+    ampm: function (time) {
+      return time > 12 ? time - 12 + ' p.m.' : time === 0 ? '12 a.m.' : time === 12 ? '12 p.m.' : time + ' a.m.'
+    },
+    getThisTimeBreak: function (step, timeBreak, i) {
+      var arr = step.timeBreak.filter((k, j) => {
+        return j < i
+      })
+      var ret = 0
+      for (var a of arr) {
+        ret += Number(a.timeMin)
+      }
+      return ret
+    },
+    filterFolds: function (step) {
+      var steps = []
+      var nextStep = this.$store.state.recipe.steps[this.$store.state.recipe.steps.indexOf(step) + 1]
+      step.timeBreak.forEach((d, i) => {
+        if (moment(nextStep.startTime).diff(moment(step.startTime).add(d.timeMin * (i + 1), 'm'), 'm') > 0) {
+          steps.push(d)
+        }
+      })
+      return steps
+    },
     day: function (step) {
       var showDate = true
       var i = 0
@@ -513,18 +584,19 @@ export default {
       }
       return ret
     },
-    makeViz: function () {
+    makeViz: function (remaking) {
       var that = this
       var data = this.$store.state.recipe.steps
 
       // Reset start time now that recipe is fetched
-      if (this.$store.state.recipe.recommendedTimes) console.log('adding', this.$store.state.recipe.recommendedTimes[0].startTime, 'to', moment().startOf('day'), moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h'))
-      this.dateDefaults['start_ideal'] = this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0].startTime ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment()
+      if (!remaking) {
+        this.dateDefaults['start_ideal'] = this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0].startTime ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment()
 
-      this.dateDefaults['finish_ideal'] = this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0] ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment()
+        this.dateDefaults['finish_ideal'] = this.$store.state.recipe.recommendedTimes && this.$store.state.recipe.recommendedTimes[0] ? moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h').diff(moment(), 'm') < 0 ? moment().startOf('day').add(1, 'd').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment().startOf('day').add(this.$store.state.recipe.recommendedTimes[0].startTime, 'h') : moment()
 
-      // Default to the ideal start time
-      this.skedStartDate = this.dateDefaults['start_ideal']
+        // Default to the ideal start time
+        this.skedStartDate = this.dateDefaults['start_ideal']
+      }
 
       // Clear content
       document.getElementById('scheduler').innerHTML = ''
@@ -546,8 +618,6 @@ export default {
         .append('svg')
         .attr('width', width)
         .attr('height', height + margin)
-
-      // console.log('sled start date', this.skedStartDate)
 
       let minSkedDate
       let maxSkedDate
@@ -789,21 +859,21 @@ export default {
         .data(d => d.timeBreak).enter()
           .append('g')
             .attr('transform', function (d, i) {
-              var lastStepTimeMax = i === 0 ? 0 : d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeIdeal || d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeMin
+              var lastStepTimeMax = that.getThisTimeBreak(d3.select(this.parentNode).data()[0], d, i)// i === 0 ? 0 : d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeIdeal || d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeMin
               return `translate(${xHour(lastStepTimeMax)}, ${y(0)})`
             })
       var googleStepsMin = googleSteps
           .append('rect')
             .attr('stroke', 'white')
             .attr('width', d => xHour(d.timeMin))
-            .attr('fill', d => d.activePassive === 'active' ? color : primary)
+            .attr('fill', d => color)// d.activePassive === 'active' ? color : primary)
             .attr('height', barHeight)
       var googleStepsMax = googleSteps
           .append('rect')
             .attr('stroke', 'white')
             .attr('opacity', 0.5)
             .attr('width', d => xHour(d.timeMax))
-            .attr('fill', d => d.activePassive === 'active' ? color : primary)
+            .attr('fill', d => color) // d.activePassive === 'active' ? color : primary)
             .attr('height', barHeight)
 
       stepsGroup
@@ -987,8 +1057,11 @@ export default {
 
         googleSteps
           .attr('transform', function (d, i) {
-            var lastStepTimeMax = i === 0 ? 0 : d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeIdeal || d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeMin
+            var lastStepTimeMax = that.getThisTimeBreak(d3.select(this.parentNode).data()[0], d, i)// i === 0 ? 0 : d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeIdeal || d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeMin
+            // console.log(d, lastStepTimeMax)
             return `translate(${xHour(lastStepTimeMax)}, ${y(0)})`
+            // var lastStepTimeMax = i === 0 ? 0 : d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeIdeal || d3.select(this.parentNode).data()[0].timeBreak[i - 1].timeMin
+            // return `translate(${xHour(lastStepTimeMax * i)}, ${y(0)})`
           })
 
         googleStepsMin
@@ -1075,7 +1148,7 @@ export default {
         // that.$store.commit('timer', {'prop': 'finishTimeMax', 'val': maxSkedDate.calendar(moment(that.$store.state.startDateSked)).replace('Tomorrow', 'tomorrow').replace('PM', 'p.m.').replace('AM', 'a.m.')})
         // that.$store.commit('recipe', {recipe: that.$store.state.recipe})
         that.$store.commit('startDate', moment(data[0].startTime))
-        that.$store.commit('endDate', moment(data[data.length - 1].startTime)) // .add(that.$store.state.recipe.totalRecipeLength, 'm'))
+        that.$store.commit('endDate', moment(data[data.length - 1].startTime).add(data[data.length - 1].timeBreak[0].timeMax, 'm')) // .add(that.$store.state.recipe.totalRecipeLength, 'm'))
 
         // Store recipe locally
         // window.localStorage.setItem(that.$store.state.recipe._id, JSON.stringify(that.$store.state.recipe))
@@ -1091,7 +1164,7 @@ export default {
         //   that.skedStartDateTarget = null
         //   updateChart()
         // }
-      }
+      } // end updateChart()
 
       this.updateChart = function (params) {
         updateChart(params)
@@ -1116,7 +1189,24 @@ export default {
 
     showScheduler: function () {
       this.view = 'scheduler'
-      this.$nextTick(() => this.makeViz())
+      this.$nextTick(() => this.makeViz(true))
+    },
+    updateCustomTime: function (val, type) {
+      if (type === 'hour') {
+        this.timeLabel = this.ampm(val)
+        this.customTime = val
+      } else {
+        this.dayLabel = val
+        this.customDay = val === 'today' ? 0 : val === 'tomorrow' ? 1 : val === 'yesterday' ? -1 : 0
+      }
+      // console.log('day', this.customDay)
+      this.toggleButton('custom')
+    },
+    showCustom: function () {
+      this.buttonSelected = 'custom'
+      this.selectedTime = this.dateLabels[this.buttonSelected]
+      this.customShowing = true
+      this.toggleButton('custom')
     },
     toggleButton: function (sel) {
       if (sel === 'start' || sel === 'finish') {
@@ -1125,7 +1215,13 @@ export default {
         this.selectedTime = this.dateLabels[sel]
         this.buttonSelected = sel
       }
-      // console.log(this.selectedStartEnd + '_' + this.selectedStartEnd)
+      if (this.buttonSelected === 'custom') {
+        if (this.selectedStartEnd === 'start') {
+          this.dateDefaults[this.selectedStartEnd + '_' + this.buttonSelected] = moment().startOf('day').add(this.customDay, 'd').add(this.customTime, 'h')
+        } else {
+          this.dateDefaults[this.selectedStartEnd + '_' + this.buttonSelected] = moment().startOf('day').add(this.customDay, 'd').add(this.customTime, 'h').subtract(this.$store.state.recipe.totalRecipeLength, 'm')
+        }
+      }
       this.skedStartDate = this.dateDefaults[this.selectedStartEnd + '_' + this.buttonSelected]
       // Make data adjustments here before rebuilding the chart
       // Doing this because user might have modified position, so we need to carefully
@@ -1135,6 +1231,9 @@ export default {
         datum.startTime = null
         // datum.additiveTimeMin = null
         // datum.additiveTimeMax = null
+      }
+      if (this.buttonSelected !== 'custom') {
+        this.customShowing = false
       }
       // this.makeViz()
       this.processData()
@@ -1152,6 +1251,7 @@ export default {
         // datum.additiveTimeMin = null
         // datum.additiveTimeMax = null
       }
+      this.customShowing = false
       // Clear from local storage memory
       window.localStorage.removeItem(this.$store.state.recipe._id)
       // this.makeViz()
@@ -1210,31 +1310,31 @@ export default {
       return moment(endDate).add(2, 'h')
     },
     stepImage: function (step) {
-      var start = '<img src="'
-      var end = '" class="w-100" />'
-      if (step.category.toLowerCase().match(/autolyse/gi) !== null || step.category.toLowerCase().match(/premix/gi) !== null) return start + this.thumbnail('static/autolyse-sm.jpg') + end
-
-      if (step.category.toLowerCase().match(/levain/gi) !== null || step.category.toLowerCase().match(/feed/gi) !== null) return start + this.thumbnail('static/levain-sm.jpg') + end
-
-      if (step.category.toLowerCase().match(/mix/gi) !== null) return start + this.thumbnail('static/mix-sm.jpg') + end
-
-      if (step.step.match(/salt/gi) !== null) return start + this.thumbnail('static/salt-sm.jpg') + end
-
-      if (step.category.toLowerCase().match(/bulk/gi) !== null) return start + this.thumbnail('static/bulk-sm.jpg') + end
-
-      if (step.step.match(/stretch/gi) !== null || step.step.match(/fold/gi) !== null) return start + this.thumbnail('static/stretch-fold-sm.jpg') + end
-
-      if (step.step.match(/pre-/gi) !== null || step.step.match(/preshap/gi) !== null) return start + this.thumbnail('static/preshape-sm.jpg') + end
-
-      if (step.step.match(/shap/gi) !== null) return start + this.thumbnail('static/shaping-sm.jpg') + end
-
-      if (step.step.match(/proof/gi) !== null) return start + this.thumbnail('static/proof-sm.jpg') + end
-
-      if (step.step.match(/cut/gi) !== null) return start + this.thumbnail('static/cutting-sm.jpg') + end
-
-      if (step.step.match(/bake/gi) !== null || step.category.match(/bake/gi) !== null) return start + this.thumbnail('static/bread2.jpg') + end
-
-      return ''
+      return step.image ? `<img src="${step.image}" class="w-100" />` : ''
+      // var start = '<img src="'
+      // var end = '" class="w-100" />'
+      // if (step.category.toLowerCase().match(/autolyse/gi) !== null || step.category.toLowerCase().match(/premix/gi) !== null) return start + this.thumbnail('static/autolyse-sm.jpg') + end
+      //
+      // if (step.category.toLowerCase().match(/levain/gi) !== null || step.category.toLowerCase().match(/feed/gi) !== null) return start + this.thumbnail('static/levain-sm.jpg') + end
+      //
+      // if (step.category.toLowerCase().match(/mix/gi) !== null) return start + this.thumbnail('static/mix-sm.jpg') + end
+      //
+      // if (step.step.match(/salt/gi) !== null) return start + this.thumbnail('static/salt-sm.jpg') + end
+      //
+      // if (step.category.toLowerCase().match(/bulk/gi) !== null) return start + this.thumbnail('static/bulk-sm.jpg') + end
+      //
+      // if (step.step.match(/pre-/gi) !== null || step.step.match(/preshap/gi) !== null || step.category.match(/preround/gi) !== null) return start + this.thumbnail('static/preshape-sm.jpg') + end
+      //
+      // if (step.step.match(/stretch/gi) !== null || step.step.match(/fold/gi) !== null) return start + this.thumbnail('static/stretch-fold-sm.jpg') + end
+      //
+      // if (step.step.match(/shap/gi) !== null) return start + this.thumbnail('static/shaping-sm.jpg') + end
+      //
+      // if (step.step.match(/proof/gi) !== null) return start + this.thumbnail('static/proof-sm.jpg') + end
+      //
+      // if (step.step.match(/cut/gi) !== null) return start + this.thumbnail('static/cutting-sm.jpg') + end
+      //
+      // if (step.step.match(/bake/gi) !== null || step.category.match(/bake/gi) !== null) return start + this.thumbnail('static/bread2.jpg') + end
+      // return ''
     },
     calendar: function (startDate) {
       return startDate ? startDate.calendar(moment()).replace('Tomorrow', 'tomorrow').replace('Today', 'today').replace('PM', 'p.m.').replace('AM', 'a.m.').replace(' at', ' at <strong><span class="text-primary">') + '</span></strong>' : ''
@@ -1248,6 +1348,9 @@ export default {
     },
     getPercentages: function (data, item) {
       return Math.round((item.amount / data.totalFlour) * 100) + '%'
+    },
+    calculateFoldTimes: function (step, datum, i) {
+      return moment(step.startTime).add(this.getThisTimeBreak(step, datum, i), 'm').format('h:mm\xa0a')
     },
     convertMeasurement: function (ingredient) {
       ingredient.amount = Number(String(ingredient.amount).replace(/[A-Za-z]/gi, ''))

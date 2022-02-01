@@ -6,6 +6,8 @@ import Recipe from '@/components/Recipe'
 import Login from '@/components/Login'
 import Logout from '@/components/Logout'
 import About from '@/components/About'
+import IOSApp from '@/components/IOSApp'
+import Privacy from '@/components/Privacy'
 import Contact from '@/components/Contact'
 import Register from '@/components/Register'
 import Calendar from '@/components/Calendar'
@@ -48,6 +50,20 @@ export default new Router({
       name: 'About',
       components: {
         default: About
+      }
+    },
+    {
+      path: '/app',
+      name: 'IOSApp',
+      components: {
+        default: IOSApp
+      }
+    },
+    {
+      path: '/privacy',
+      name: 'Privacy',
+      components: {
+        default: Privacy
       }
     },
     {

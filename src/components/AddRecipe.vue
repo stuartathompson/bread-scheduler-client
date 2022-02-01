@@ -188,6 +188,20 @@
                 </b-col>
               </b-row>
             </div>
+
+            <b-row>
+              <b-col>
+                <hr />
+                <h6>In-app purchase code</h6>
+              </b-col>
+            </b-row>
+            <div class="mb-2">
+              <b-row class="mb-2">
+                <b-col sm="3" class="pr-0">
+                  <b-input placeholder="" v-model="recipe.inAppPurchase"></b-input>
+                </b-col>
+              </b-row>
+            </div>
       </div>
     </b-row>
     <b-row>
@@ -338,7 +352,9 @@ export default {
       this.recipe.totalRecipeLength = 0
       for (var step of this.recipe.steps) {
         // Add up total time from maxes
-        if (step.timeBreak[0] !== undefined) this.recipe.totalRecipeLength += Number(step.timeBreak[0].timeIdeal) || Number(step.timeBreak[0].timeMin)
+        for (var timeBreak of step.timeBreak) {
+          this.recipe.totalRecipeLength += Number(timeBreak.timeIdeal) || Number(timeBreak.timeMin)
+        }
       }
       // Determine flour total
       for (var item of this.recipe.ingredients) {

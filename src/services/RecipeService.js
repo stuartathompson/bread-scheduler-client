@@ -28,5 +28,9 @@ export default {
 
   searchRecord (params) {
     return Api().post('search', params)
+  },
+
+  addEmail (params) {
+    return Api().post('app-signup', params)
   }
 }

@@ -86,7 +86,8 @@
                         <b-col sm="5 pr-0">
                           <b-input placeholder="Ingredient" v-model="ingredient.ingredient"></b-input>
                         </b-col>
-                        <b-col sm="2" class="text">
+                        <b-col sm="2" class="text" @click="deleteIngredient(ingredient, item)">
+                          ok
                           <close-icon></close-icon>
                         </b-col>
                       </b-row>
@@ -113,27 +114,52 @@
             </b-row>
             <div class="pb-3 mb-2 border-top-0 border-left-0 border-right-0 border" v-for="step of recipe.steps">
               <b-row class="mb-2">
-                <b-col sm="3" class="pr-0">
-                  <b-input placeholder="Bulk" v-model="step.category"></b-input>
+                <b-col sm="3" class="pr-2">
+                  <b-row class="pb-3">
+                    <b-input placeholder="Bulk" v-model="step.category"></b-input>
+                    {{ step.image }}
+                  </b-row>
+                  <b-row class="pb-3">
+                    <b-dropdown class="pr-2" :text="step.image ? step.image : 'Select an image'" >
+                      <b-dropdown-item-button boundary="window" v-for="image of imagesForSteps" @click="setStepImage(step, image.url)">
+                        {{ image.name }}
+                        <!-- <img v-if="step.image" class="w-100" :src="image" /> -->
+                      </b-dropdown-item-button>
+                    </b-dropdown>
+                  </b-row>
+                  <b-row class="pb-3">
+                    <div class="mb-2" pr-2 v-if="step.image">
+                      <div class="mb-1">
+                        <img v-if="step.image" class="w-100" :src="step.image" />
+                        {{ step.image }}<br  />
+                      </div>
+                    </div>
+                  </b-row>
                 </b-col>
                 <b-col>
                   <b-textarea rows="4" placeholder="Bulk for 3-4 hours" v-model="step.step"></b-textarea>
                 </b-col>
               </b-row>
-              <b-row v-if="step.ingredients.length > 0">
+              <b-row v-if="step.relevantIngredients.length > 0">
                 <b-col offset="3">
                   <strong>For this step</strong>
                 </b-col>
               </b-row>
-              <b-row class="pb-2" v-if="step.ingredients.length > 0" v-for="ingredient of step.ingredients">
+              <b-row class="pb-2" v-if="step.relevantIngredients.length > 0" v-for="relevantIngredient of step.relevantIngredients">
+                <b-col offset="3">
+                  <b-dropdown :text="relevantIngredient.ingredient == '' ? 'Choose an ingredient' : relevantIngredient.ingredient">
+                    <span v-for="ingredientGroup of recipe.ingredients">
+                      <b-dropdown-item-button @click="setStepIngredient(relevantIngredient, ingredientGroup, ingredient)" value="active" v-for="ingredient of ingredientGroup.ingredients">
+                        {{ ingredient.ingredient }} <span class="text-lighter">– {{ingredient.amount}}g</span>
+                      </b-dropdown-item-button>
+                    </span>
+                  </b-dropdown>
+                  <b-link class="float-right text-danger" @click="deleteRelevantIngredient(step, relevantIngredient)"><minus-icon></minus-icon>Delete ingredient</b-link>
+                </b-col>
+              </b-row>
+              <b-row class="pb-3">
                 <b-col offset="3" sm="3" class="pr-0">
-                  <b-input placeholder="100g" v-model="ingredient.amount"></b-input>
-                </b-col>
-                <b-col>
-                  <b-input placeholder="White flour" v-model="ingredient.ingredient"></b-input>
-                </b-col>
-                <b-col sm="1" class="text">
-                  <close-icon></close-icon>
+                  <b-link @click="addIngredientToStep(step)"><plus-icon></plus-icon>Ingredient</b-link>
                 </b-col>
               </b-row>
               <b-row v-if="step.timeBreak.length > 0">
@@ -160,14 +186,14 @@
               </b-row>
               <b-row v-if="step.timeBreak.length > 0" >
                 <b-col offset="3">
-                  <b-link @click="addTimeBreak(step.timeBreak)"><plus-icon></plus-icon>Time step</b-link>
+                  <b-link @click="addTimeBreak(step.timeBreak)"><plus-icon></plus-icon>Another time step</b-link>
                   <hr />
                 </b-col>
               </b-row>
               <b-row>
                 <b-col offset="3">
-                  <b-link @click="addIngredientToStep(step)"><plus-icon></plus-icon>Ingredient</b-link><br />
-                  <b-link @click="addTimeBreakToStep(step)"><plus-icon></plus-icon>Time Break</b-link>
+                  <b-link @click="addTimeBreakToStep(step)"><plus-icon></plus-icon>Use time breaks</b-link> <span class="text-lighter">|</span>
+                  <!-- <b-link @click="addFoldToStep(step)"><plus-icon></plus-icon>Use fold steps</b-link> -->
                   <b-link class="float-right text-danger" @click="deleteStep(step)"><minus-icon></minus-icon>Delete step</b-link>
                 </b-col>
               </b-row>
@@ -207,7 +233,6 @@
             <div class="mb-2">
               <b-row class="mb-2">
                 <b-col sm="3" class="pr-0">
-                  Value: {{ recipe.hide }}
                   <b-form-checkbox
                     id="showhide"
                     v-model="recipe.hide"
@@ -219,6 +244,23 @@
                 </b-col>
               </b-row>
             </div>
+            <b-row>
+              <b-col>
+                <hr />
+                <h6>In-app purchase code</h6>
+              </b-col>
+            </b-row>
+            <div class="mb-2">
+              <b-row class="mb-2">
+                <b-col sm="3" class="pr-0">
+                  <b-input placeholder="Label" v-model="recipe.inAppPurchase.label"></b-input>
+                </b-col>
+                <b-col sm="3" class="pr-0">
+                  <b-input placeholder="Code" v-model="recipe.inAppPurchase.code"></b-input>
+                </b-col>
+              </b-row>
+            </div>
+
       <b-col>
         <hr />
         Total recipe time: {{ recipe.totalRecipeLength | hours }}
@@ -245,6 +287,52 @@ export default {
   name: 'editRecipe',
   data () {
     return {
+      imagesForSteps: [
+        {
+          'name': 'autolyse',
+          'url': 'static/autolyse-sm.jpg'
+        },
+        {
+          'name': 'levain',
+          'url': 'static/levain-sm.jpg'
+        },
+        {
+          'name': 'mix',
+          'url': 'static/mix-sm.jpg'
+        },
+        {
+          'name': 'salt',
+          'url': 'static/salt-sm.jpg'
+        },
+        {
+          'name': 'bulk',
+          'url': 'static/bulk-sm.jpg'
+        },
+        {
+          'name': 'preshape',
+          'url': 'static/preshape-sm.jpg'
+        },
+        {
+          'name': 'stretchFold',
+          'url': 'static/stretch-fold-sm.jpg'
+        },
+        {
+          'name': 'shaping',
+          'url': 'static/shaping-sm.jpg'
+        },
+        {
+          'name': 'proof',
+          'url': 'static/proof-sm.jpg'
+        },
+        {
+          'name': 'cutting',
+          'url': 'static/cutting-sm.jpg'
+        },
+        {
+          'name': 'default/bake',
+          'url': 'static/bread2.jpg'
+        }
+      ],
       preferences: {
         measurement: 'grams' // ounces, grams, volume
       },
@@ -287,7 +375,6 @@ export default {
   },
   methods: {
     processTimeInput: function (timeBreakVal) {
-      console.log('ok')
       // var timeBreakText = '' + timeBreakVal
       // // If has hours or h, process into minutes
       // if (timeBreakText.match('h') !== null) {
@@ -312,6 +399,13 @@ export default {
         // this.$router.push({ path: `${recipe._id}/edit` })
         this.$store.dispatch('getRecipe', recipe)
       }
+    },
+    setStepImage: function (step, url) {
+      step.image = url
+    },
+    setStepIngredient: function (relevantIngredient, ingredientGroup, ingredient) {
+      relevantIngredient.group = ingredientGroup.item
+      relevantIngredient.ingredient = ingredient.ingredient
     },
     setPreference: function (preference, value) {
       this.preferences[preference] = value
@@ -339,8 +433,13 @@ export default {
         'activePassive': 'active'
       })
     },
+    // addFoldToStep (step) {
+    //   if (!step.folds) step.folds = []
+    //   step.folds.push({
+    //     'time': ''
+    //   })
+    // },
     addTimeBreakToStep (step) {
-      console.log(step)
       if (!step.timeBreak) step.timeBreak = []
       step.timeBreak.push({
         'timeMin': '',
@@ -358,6 +457,11 @@ export default {
         }]
       })
     },
+    deleteIngredient (ingredient, item) {
+      var itemIndex = this.recipe.ingredients.indexOf(item)
+      var ingredientIndex = this.recipe.ingredients[itemIndex].ingredients.indexOf(ingredient)
+      this.recipe.ingredients[itemIndex].ingredients.splice(ingredientIndex, 1)
+    },
     addIngredientToItem (item) {
       item.ingredients.push({
         'amount': '',
@@ -365,8 +469,7 @@ export default {
       })
     },
     addIngredientToStep (step) {
-      step.ingredients.push({
-        'amount': '',
+      step.relevantIngredients.push({
         'ingredient': ''
       })
     },
@@ -378,6 +481,9 @@ export default {
     },
     deleteStep (step) {
       this.recipe.steps.splice(this.recipe.steps.indexOf(step), 1)
+    },
+    deleteRelevantIngredient (step, relevantIngredient) {
+      this.recipe.steps[this.recipe.steps.indexOf(step)].relevantIngredients.splice(this.recipe.steps[this.recipe.steps.indexOf(step)].relevantIngredients.indexOf(relevantIngredient), 1)
     },
     addStep () {
       this.recipe.steps.push({
@@ -391,7 +497,9 @@ export default {
       this.recipe.totalRecipeLength = 0
       for (var step of this.recipe.steps) {
         // Add up total time from maxes
-        if (step.timeBreak[0] !== undefined) this.recipe.totalRecipeLength += Number(step.timeBreak[0].timeIdeal) || Number(step.timeBreak[0].timeMin)
+        for (var timeBreak of step.timeBreak) {
+          this.recipe.totalRecipeLength += Number(timeBreak.timeIdeal) || Number(timeBreak.timeMin)
+        }
       }
       // Determine flour total
       for (var item of this.recipe.ingredients) {
@@ -402,12 +510,10 @@ export default {
       }
     },
     onFileChange (attachment) {
-      console.log('file change', this.$refs.file.files)
       this.imageChanged = true
       this.recipe.images = this.$refs.file.files
     },
     async deleteRecipe () {
-      console.log(this.$route.params.id)
       await RecipeService.deleteRecord(this.$route.params.id)
       this.$router.push({ name: 'Recipes' })
     },
@@ -418,21 +524,17 @@ export default {
     // }
     //
     async updateRecipe (e) {
-      e.preventDefault()
+      if (e) e.preventDefault()
 
       var response = false
-      console.log('imgs', this.recipe.images)
 
       if (this.imageChanged && this.recipe.images !== null) {
         var data = new FormData()
         for (var image of this.recipe.images) {
           data.append('file', image)
         }
-        console.log('formdata', data)
         // data.append('file', this.attachments)
         response = await RecipeService.addImage(data)
-
-        console.log('image response')
 
         // Build response array
         for (var j in response.data.files) {
@@ -448,7 +550,6 @@ export default {
         this.recipe.images = this.images_results
       }
 
-      console.log('ok done with image', this.recipe)
       this.processRecipe()
       this.$store.dispatch('updateRecipe', this.recipe)
     }

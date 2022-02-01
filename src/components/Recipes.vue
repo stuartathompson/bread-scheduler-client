@@ -17,7 +17,7 @@
             <star-icon v-for="i in [1, 2, 3, 4, 5]"></star-icon>
           </div> -->
           <!-- <b-link class="text-bold text-caps text-dark">Start now »</b-link> -->
-          <b-btn variant="primary" size="sm">Start now</b-btn>
+          <b-btn variant="primary" size="sm">Start at {{ startTime(recipe) }}</b-btn>
         </b-card-body>
       </b-card>
     </div>
@@ -26,14 +26,12 @@
         <b-col class="mt-3 mb-sm-5 mb-4 text-sm-center text-left">
           <h2 class="d-none d-sm-block">Bread Scheduler helps you make sourdough.</h2>
           <h2 class="d-block d-sm-none">Sourdough made easier.</h2>
-          <b-row>
-            <b-col sm="8 m-auto" md="7 m-auto">
-              <p class="text-large">
-                We take bread recipes and time them for an easier bake. Use these tools, timers and schedulers help you make better bread.
-              </p>
-              <hr class="d-block d-sm-none" />
-            </b-col>
-          </b-row>
+          <div class="mw-600">
+            <p class="text-large">
+              We take bread recipes and time them for an easier bake. Use these tools, timers and schedulers help you make better bread.
+            </p>
+            <hr class="d-block d-sm-none" />
+          </div>
         </b-col>
       </b-row>
       <b-row class="justify-content-center">
@@ -52,9 +50,9 @@
               </span>
               {{ recipe.shortDescription }}
             </p>
-            <!-- <p class="pt-1 mb-0 text-medium">
-              Finish <span v-html="timeUntilDone(recipe)"></span>
-            </p> -->
+            <p class="pt-1 mb-0 text-medium text-primary">
+              <TimerIcon></TimerIcon> Start at <span v-html="startTime(recipe)"></span>
+            </p>
         </b-card>
         </b-col>
       </b-row>
@@ -126,7 +124,12 @@ export default {
   },
   computed: {
     recipes: function () {
-      return this.$store.state.recipes
+      var now = moment()
+      var start = moment().startOf('day')
+      return this.$store.state.recipes ? this.$store.state.recipes
+        .sort((a, b) => {
+          return start.add(a.recommendedTimes[0].startTime, 'h').diff(now, 'h') < start.add(b.recommendedTimes[0].startTime, 'h').diff(now, 'h')
+        }) : null
     }
   },
   methods: {
@@ -153,8 +156,8 @@ export default {
     thumbnailImage: function (recipe) {
       return recipe.localThumb ? recipe.localThumb : recipe.localImage ? recipe.localImage : recipe.images ? recipe.images[0] ? recipe.images[0].secure_url : 'static/bread2.jpg' : 'static/bread2.jpg'
     },
-    startTime: function (step) {
-      // var totalMaxTime = step
+    startTime: function (recipe) {
+      return moment().startOf('day').add(recipe.recommendedTimes[0].startTime, 'h').format('h:mm a')
     },
     timeUntilDone: function (recipe) {
       var myicon = instance.$mount()
