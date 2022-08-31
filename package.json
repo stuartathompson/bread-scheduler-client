@@ -21,7 +21,7 @@
     "es6-promise": "^4.2.8",
     "express-flash": "0.0.2",
     "moment": "^2.24.0",
-    "moment-timezone": "^0.5.28",
+    "moment-timezone": "^0.5.35",
     "octicons": "^8.5.0",
     "vue": "^2.6.11",
     "vue-analytics": "^5.22.1",
